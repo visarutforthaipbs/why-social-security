@@ -1,0 +1,70 @@
+<svg width="500" height="500" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g>
+    <!-- Background circle -->
+    <circle cx="250" cy="250" r="220" fill="#F5F5F5" />
+    
+    <!-- Person 1 (left) -->
+    <g transform="translate(100, 150)">
+      <!-- Head -->
+      <circle cx="0" cy="0" r="40" fill="#FFBD59" />
+      <!-- Face -->
+      <circle cx="-15" cy="-5" r="5" fill="#444" />
+      <circle cx="15" cy="-5" r="5" fill="#444" />
+      <path d="M -10 15 Q 0 25 10 15" stroke="#444" stroke-width="3" fill="none" />
+      <!-- Hair -->
+      <path d="M -30 -20 Q -40 -40 -20 -50 Q 0 -60 20 -50 Q 40 -40 30 -20" fill="#333" />
+      <!-- Body -->
+      <path d="M 0 40 L -30 110 L 30 110 Z" fill="#FF5757" />
+      <!-- Arms -->
+      <path d="M -25 60 L -50 80" stroke="#FFBD59" stroke-width="12" stroke-linecap="round" />
+      <path d="M 25 60 L 60 90" stroke="#FFBD59" stroke-width="12" stroke-linecap="round" />
+    </g>
+    
+    <!-- Person 2 (middle) -->
+    <g transform="translate(250, 130)">
+      <!-- Head -->
+      <circle cx="0" cy="0" r="40" fill="#D18C65" />
+      <!-- Face -->
+      <circle cx="-15" cy="-5" r="5" fill="#444" />
+      <circle cx="15" cy="-5" r="5" fill="#444" />
+      <path d="M -10 15 Q 0 25 10 15" stroke="#444" stroke-width="3" fill="none" />
+      <!-- Hair -->
+      <path d="M -35 -10 Q -40 -30 -25 -40 Q 0 -50 25 -40 Q 40 -30 35 -10" fill="#111" />
+      <!-- Body -->
+      <path d="M 0 40 L -30 110 L 30 110 Z" fill="#2E7DF7" />
+      <!-- Arms raised -->
+      <path d="M -25 60 L -50 40" stroke="#D18C65" stroke-width="12" stroke-linecap="round" />
+      <path d="M 25 60 L 50 40" stroke="#D18C65" stroke-width="12" stroke-linecap="round" />
+    </g>
+    
+    <!-- Person 3 (right) -->
+    <g transform="translate(390, 170)">
+      <!-- Head -->
+      <circle cx="0" cy="0" r="35" fill="#E9C3A0" />
+      <!-- Face -->
+      <circle cx="-12" cy="-5" r="4" fill="#444" />
+      <circle cx="12" cy="-5" r="4" fill="#444" />
+      <path d="M -8 12 Q 0 20 8 12" stroke="#444" stroke-width="3" fill="none" />
+      <!-- Hair -->
+      <path d="M -25 -15 L -30 -45 L 30 -45 L 25 -15" fill="#8B572A" />
+      <path d="M -25 -15 Q -30 -5 -20 0" fill="#8B572A" />
+      <path d="M 25 -15 Q 30 -5 20 0" fill="#8B572A" />
+      <!-- Body -->
+      <path d="M 0 35 L -25 90 L 25 90 Z" fill="#9747FF" />
+      <!-- Arms -->
+      <path d="M -20 50 L -45 60" stroke="#E9C3A0" stroke-width="10" stroke-linecap="round" />
+      <path d="M 20 50 L 40 30" stroke="#E9C3A0" stroke-width="10" stroke-linecap="round" />
+    </g>
+    
+    <!-- Connection lines (representing network/community) -->
+    <line x1="150" y1="200" x2="230" y2="170" stroke="#AAA" stroke-width="2" stroke-dasharray="5,5" />
+    <line x1="270" y1="170" x2="360" y2="190" stroke="#AAA" stroke-width="2" stroke-dasharray="5,5" />
+    <line x1="150" y1="200" x2="360" y2="190" stroke="#AAA" stroke-width="2" stroke-dasharray="5,5" />
+    
+    <!-- Shield icon (representing protection/security) -->
+    <g transform="translate(250, 320)">
+      <path d="M 0 -30 L 35 -10 L 20 30 L 0 15 L -20 30 L -35 -10 Z" fill="white" stroke="#2E7DF7" stroke-width="3" />
+      <circle cx="0" cy="0" r="10" fill="#FF5757" />
+    </g>
+  </g>
+</svg> 

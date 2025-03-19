@@ -1,0 +1,22 @@
+<svg width="1440" height="1024" viewBox="0 0 1440 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g opacity="0.5">
+    <circle cx="128" cy="128" r="64" fill="white" fill-opacity="0.1"/>
+    <circle cx="384" cy="256" r="96" fill="white" fill-opacity="0.1"/>
+    <circle cx="640" cy="128" r="48" fill="white" fill-opacity="0.1"/>
+    <circle cx="896" cy="384" r="120" fill="white" fill-opacity="0.1"/>
+    <circle cx="1152" cy="256" r="80" fill="white" fill-opacity="0.1"/>
+    <circle cx="1408" cy="128" r="64" fill="white" fill-opacity="0.1"/>
+    <circle cx="128" cy="512" r="80" fill="white" fill-opacity="0.1"/>
+    <circle cx="384" cy="640" r="48" fill="white" fill-opacity="0.1"/>
+    <circle cx="640" cy="512" r="96" fill="white" fill-opacity="0.1"/>
+    <circle cx="896" cy="768" r="64" fill="white" fill-opacity="0.1"/>
+    <circle cx="1152" cy="640" r="120" fill="white" fill-opacity="0.1"/>
+    <circle cx="1408" cy="512" r="80" fill="white" fill-opacity="0.1"/>
+    <circle cx="128" cy="896" r="64" fill="white" fill-opacity="0.1"/>
+    <circle cx="384" cy="1024" r="96" fill="white" fill-opacity="0.1"/>
+    <circle cx="640" cy="896" r="48" fill="white" fill-opacity="0.1"/>
+    <circle cx="896" cy="1024" r="120" fill="white" fill-opacity="0.1"/>
+    <circle cx="1152" cy="896" r="80" fill="white" fill-opacity="0.1"/>
+    <circle cx="1408" cy="1024" r="64" fill="white" fill-opacity="0.1"/>
+  </g>
+</svg> 

@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MySocialSecurity Campaign Website
+
+A website for a campaign to engage the public on social security in Thailand, specifically targeting Gen Z, Gen Y, and younger individuals, including insured persons under sections 33, 39, and 40.
+
+## Project Overview
+
+The website aims to:
+
+- Educate users about social security in Thailand
+- Collect feedback on desired benefits
+- Encourage participation in a survey and forum
+- Present information in a modern, user-friendly way for younger audiences
+
+## Features
+
+- **Home Page**: Overview of the campaign with a bold hero section
+- **Section Selection**: Users can identify their social security category (33, 39, 40)
+- **User Input Form**: Collects basic demographic information
+- **Benefits Suggestion**: Users can propose benefits they want in their category
+- **Educational Content**: Information about social security presented in an engaging way
+- **Survey Integration**: Collects detailed feedback to be presented at the upcoming forum
+- **MongoDB Integration**: Stores user feedback for analytics purposes
+
+## Tech Stack
+
+- Next.js 15
+- TypeScript
+- Tailwind CSS
+- Chakra UI
+- React Icons
+- MongoDB for data storage
+- Mongoose for MongoDB object modeling
 
 ## Getting Started
 
-First, run the development server:
+First, install the dependencies:
+
+```bash
+npm install
+```
+
+### Setting up MongoDB
+
+1. Create a `.env.local` file in the root directory
+2. Copy the contents from `.env.local.example` and replace with your MongoDB connection string:
+   ```
+   MONGODB_URI=mongodb+srv://your-username:your-password@your-cluster-url/your-database
+   MONGODB_DB=social-security-feedback
+   ```
+3. If you're using MongoDB Atlas:
+   - Create an account at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+   - Create a new cluster
+   - Create a database user with read/write permissions
+   - Add your IP address to the allowed list
+   - Get the connection string and replace the placeholder in `.env.local`
+
+Then, run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `/src/app`: Pages using Next.js App Router
+- `/src/components`: Reusable UI components
+- `/public`: Static assets like images and icons
+- `/src/lib`: Utility functions including MongoDB connection
+- `/src/models`: MongoDB schemas and models
+- `/src/services`: Service functions for API calls
+- `/src/app/api`: API routes for backend functionality
 
-## Learn More
+## Data Analytics
 
-To learn more about Next.js, take a look at the following resources:
+User feedback data is stored in MongoDB with the following structure:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Section type (33, 39, 40)
+- User demographic data
+- Benefits used and suggestions
+- Timestamp
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+This data can be analyzed to understand:
 
-## Deploy on Vercel
+- Which benefits are most commonly used across different sections
+- What additional benefits users want
+- Demographics of respondents
+- Patterns in benefit usage by age, occupation, etc.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deployment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This website is set to be launched on April 1st, with survey data being presented at a forum on April 9th.
+
+## License
+
+This project is licensed under the MIT License.
