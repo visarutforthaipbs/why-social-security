@@ -22,6 +22,9 @@ export const metadata: Metadata = {
     "เข้าร่วมแคมเปญเพื่อร่วมกำหนดอนาคตของระบบประกันสังคมในประเทศไทยสำหรับคนรุ่นใหม่ Gen Z และ Gen Y",
   keywords:
     "ประกันสังคม, ไทย, มาตรา 33, มาตรา 39, มาตรา 40, คนรุ่นใหม่, Gen Z, Gen Y",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({

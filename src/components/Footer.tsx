@@ -25,7 +25,7 @@ const Footer = () => {
               height={{ base: 16, md: 20 }}
             >
               <Image
-                src="/1.png"
+                src="/3.png"
                 alt="Logo 1"
                 fill
                 style={{ objectFit: "contain" }}
@@ -37,7 +37,7 @@ const Footer = () => {
               height={{ base: 16, md: 20 }}
             >
               <Image
-                src="/2.png"
+                src="/1.png"
                 alt="Logo 2"
                 fill
                 style={{ objectFit: "contain" }}
@@ -45,11 +45,11 @@ const Footer = () => {
             </Box>
             <Box
               position="relative"
-              width={{ base: 20, md: 24 }}
-              height={{ base: 16, md: 20 }}
+              width={{ base: 16, md: 25 }}
+              height={{ base: 16, md: 45 }}
             >
               <Image
-                src="/3.png"
+                src="/2.png"
                 alt="Logo 3"
                 fill
                 style={{ objectFit: "contain" }}

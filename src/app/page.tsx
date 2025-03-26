@@ -292,10 +292,10 @@ export default function Home() {
               </Box>
               <Flex justify="center">
                 <Image
-                  src="/cover-1.png"
+                  src="/cover-gif.gif"
                   alt="คนรุ่นใหม่ที่หลากหลาย"
-                  width={500}
-                  height={500}
+                  width={700}
+                  height={700}
                   priority
                   className="drop-shadow-lg w-full h-auto max-w-[500px]"
                 />
@@ -1054,7 +1054,7 @@ export default function Home() {
               </Icon>
             </Box>
 
-            <Heading as="h1" size="2xl" fontWeight="bold" mb={4}>
+            <Heading as="h1" size="xl" fontWeight="bold" mb={4}>
               ขอบคุณสำหรับความคิดเห็นของคุณ!
             </Heading>
             <Text variant="subtitle" fontSize="xl" mb={8}>
@@ -1094,8 +1094,8 @@ export default function Home() {
                   "คุ้มครองกรณีว่างงาน",
                   "จ่าย 5% ของเงินเดือน (สูงสุด 750 บาท)",
                 ]}
-                gradientFrom="teal.500"
-                gradientTo="blue.500"
+                gradientFrom="#3d3a7e"
+                gradientTo="#3d3a7e"
                 onClick={() => handleSectionTypeSelect("33")}
               />
               <ChakraCard
@@ -1108,8 +1108,8 @@ export default function Home() {
                   "สามารถส่งเงินสมทบได้หลายช่องทาง",
                   "จ่ายเดือนละ 432 บาท",
                 ]}
-                gradientFrom="purple.500"
-                gradientTo="pink.500"
+                gradientFrom="#F9E450"
+                gradientTo="#F9E450"
                 onClick={() => handleSectionTypeSelect("39")}
               />
               <ChakraCard
@@ -1122,8 +1122,8 @@ export default function Home() {
                   "จ่ายเงินสมทบเองในอัตราที่กำหนด",
                   "ทางเลือกที่ 1-3: 70, 100, หรือ 300 บาท",
                 ]}
-                gradientFrom="orange.500"
-                gradientTo="red.500"
+                gradientFrom="#f3762a"
+                gradientTo="#f3762a"
                 onClick={() => handleSectionTypeSelect("40")}
               />
             </Grid>
