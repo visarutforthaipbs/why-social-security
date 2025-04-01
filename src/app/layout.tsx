@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Noto_Sans_Thai, Sarabun } from "next/font/google";
 import "./globals.css";
-
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 import { Providers } from "./providers";
 
 const notoSansThai = Noto_Sans_Thai({
@@ -39,6 +39,7 @@ export default function RootLayout({
           {/* The Navbar will be rendered in each page, not here */}
           <div className="pt-16 min-h-screen w-full">{children}</div>
         </Providers>
+        <GoogleAnalytics />
       </body>
     </html>
   );
