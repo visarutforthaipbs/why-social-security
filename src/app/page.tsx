@@ -139,6 +139,7 @@ export default function Home() {
     if (!userData.monthlyContribution && selectedSection) {
       updateUserData({ monthlyContribution: getDefaultContribution() });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSection, userData.monthlyContribution]);
 
   // Handler for updating user data
@@ -1182,7 +1183,7 @@ export default function Home() {
         <Container maxW="3xl">
           <VStack textAlign="center" mb={8} spacing={4}>
             <Heading as="h1" size="xl" mb={4}>
-              สำหรับคุณ "ประกันสังคม" ควรจะเป็นอะไร ?
+              สำหรับคุณ &ldquo;ประกันสังคม&rdquo; ควรจะเป็นอะไร ?
             </Heading>
             <Text variant="subtitle">
               เลือกสิทธิประโยชน์ที่คุณต้องการให้มีหรือปรับปรุงในระบบประกันสังคม
