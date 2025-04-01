@@ -1313,7 +1313,8 @@ export default function Home() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
-                <path d="M5 13l4 4L19 7l-1.41-1.41z" />
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                <path d="M22 4L12 14.01l-3-3" />
               </Icon>
             </Box>
 
