@@ -6,11 +6,11 @@ import { ReactNode } from "react";
 
 interface ChakraCardProps {
   title: string;
-  description: string;
+  description: ReactNode;
   icon?: ReactNode;
-  benefits: string[];
-  gradientFrom: string;
-  gradientTo: string;
+  benefits?: string[];
+  gradientFrom?: string;
+  gradientTo?: string;
   onClick?: () => void;
 }
 
@@ -54,31 +54,39 @@ export function ChakraCard({
       </Box>
 
       <Box p={6}>
-        <Text mb={4}>{description}</Text>
+        {typeof description === "string" ? (
+          <Text mb={4}>{description}</Text>
+        ) : (
+          <Box mb={4}>{description}</Box>
+        )}
 
-        <Heading size="sm" fontWeight="semibold" mb={2}>
-          สิทธิประโยชน์หลัก:
-        </Heading>
+        {benefits && benefits.length > 0 && (
+          <>
+            <Heading size="sm" fontWeight="semibold" mb={2}>
+              สิทธิประโยชน์หลัก:
+            </Heading>
 
-        <VStack spacing={2} align="stretch">
-          {benefits.map((benefit, index) => (
-            <Flex key={index} alignItems="center">
-              <Flex
-                bg="accent.50"
-                rounded="full"
-                p={1}
-                mr={2}
-                alignItems="center"
-                justifyContent="center"
-                minW="16px"
-                h="16px"
-              >
-                <Icon as={FiCheck} color="accent.500" boxSize={3} />
-              </Flex>
-              <Text fontSize="sm">{benefit}</Text>
-            </Flex>
-          ))}
-        </VStack>
+            <VStack spacing={2} align="stretch">
+              {benefits.map((benefit, index) => (
+                <Flex key={index} alignItems="center">
+                  <Flex
+                    bg="accent.50"
+                    rounded="full"
+                    p={1}
+                    mr={2}
+                    alignItems="center"
+                    justifyContent="center"
+                    minW="16px"
+                    h="16px"
+                  >
+                    <Icon as={FiCheck} color="accent.500" boxSize={3} />
+                  </Flex>
+                  <Text fontSize="sm">{benefit}</Text>
+                </Flex>
+              ))}
+            </VStack>
+          </>
+        )}
       </Box>
     </Box>
   );

@@ -38,6 +38,59 @@ export async function POST(req: Request) {
       );
     }
 
+    // Basic validation for all section types
+    if (!data.userData.age || !data.userData.occupation) {
+      return NextResponse.json(
+        { error: "Missing required user data" },
+        { status: 400 }
+      );
+    }
+
+    // Validate based on section type
+    if (data.sectionType === "39") {
+      // Section 39 validation
+      if (
+        !data.userData.yearsSection33 ||
+        !data.userData.monthsSection33 ||
+        !data.userData.monthlySection33 ||
+        !data.userData.yearsSection39 ||
+        !data.userData.monthsSection39
+      ) {
+        return NextResponse.json(
+          { error: "Missing required Section 39 data" },
+          { status: 400 }
+        );
+      }
+    } else if (
+      data.sectionType === "40" ||
+      data.sectionType === "40-1" ||
+      data.sectionType === "40-2" ||
+      data.sectionType === "40-3"
+    ) {
+      // Section 40 validation
+      if (
+        !data.userData.yearsContributing ||
+        data.userData.monthsContributing === undefined ||
+        !data.userData.monthlyContribution
+      ) {
+        return NextResponse.json(
+          { error: "Missing required Section 40 data" },
+          { status: 400 }
+        );
+      }
+    } else {
+      // Section 33 and others
+      if (
+        !data.userData.yearsContributing ||
+        !data.userData.monthlyContribution
+      ) {
+        return NextResponse.json(
+          { error: "Missing required contribution data" },
+          { status: 400 }
+        );
+      }
+    }
+
     // Create new feedback document
     const feedback = new UserFeedback({
       sectionType: data.sectionType,

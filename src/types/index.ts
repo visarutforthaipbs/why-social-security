@@ -10,7 +10,7 @@ export type Section =
   | "end";
 
 // Section types for selection
-export type SectionType = "33" | "39" | "40" | null;
+export type SectionType = "33" | "39" | "40" | "40-1" | "40-2" | "40-3" | null;
 
 // User data interface
 export interface UserData {

@@ -2,14 +2,21 @@ import mongoose, { Schema } from "mongoose";
 
 // Define the model interface
 export interface IUserFeedback {
-  sectionType: "33" | "39" | "40";
+  sectionType: "33" | "39" | "40" | "40-1" | "40-2" | "40-3";
   userData: {
     name?: string;
     age: string;
     occupation: string;
     yearsContributing: string;
+    monthsContributing?: string;
     monthlyContribution: string;
     usedBenefits: string[];
+    // Additional fields for Section 39
+    yearsSection33?: string;
+    monthsSection33?: string;
+    monthlySection33?: string;
+    yearsSection39?: string;
+    monthsSection39?: string;
   };
   suggestedBenefits: {
     healthcare: boolean;
@@ -26,7 +33,7 @@ export interface IUserFeedback {
 const UserFeedbackSchema = new Schema<IUserFeedback>({
   sectionType: {
     type: String,
-    enum: ["33", "39", "40"],
+    enum: ["33", "39", "40", "40-1", "40-2", "40-3"],
     required: true,
   },
   userData: {
@@ -34,8 +41,15 @@ const UserFeedbackSchema = new Schema<IUserFeedback>({
     age: { type: String, required: true },
     occupation: { type: String, required: true },
     yearsContributing: { type: String, required: true },
+    monthsContributing: { type: String },
     monthlyContribution: { type: String, required: true },
     usedBenefits: { type: [String], default: [] },
+    // Additional fields for Section 39
+    yearsSection33: { type: String },
+    monthsSection33: { type: String },
+    monthlySection33: { type: String },
+    yearsSection39: { type: String },
+    monthsSection39: { type: String },
   },
   suggestedBenefits: {
     healthcare: { type: Boolean, default: false },
