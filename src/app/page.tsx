@@ -26,17 +26,10 @@ import {
   FormControl,
   FormLabel,
   Input,
-  InputGroup,
-  InputRightElement,
   RadioGroup,
   Radio,
   useToast,
   SimpleGrid,
-  ListItem,
-  UnorderedList,
-  Badge,
-  Center,
-  Switch,
   Checkbox,
   Textarea,
 } from "@chakra-ui/react";
@@ -1189,7 +1182,7 @@ export default function Home() {
         <Container maxW="3xl">
           <VStack textAlign="center" mb={8} spacing={4}>
             <Heading as="h1" size="xl" mb={4}>
-              สำหรับคุณ “ประกันสังคม” ควรจะเป็นอะไร ?
+              สำหรับคุณ "ประกันสังคม" ควรจะเป็นอะไร ?
             </Heading>
             <Text variant="subtitle">
               เลือกสิทธิประโยชน์ที่คุณต้องการให้มีหรือปรับปรุงในระบบประกันสังคม
