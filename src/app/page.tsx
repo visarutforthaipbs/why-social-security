@@ -1521,7 +1521,7 @@ export default function Home() {
                 onClick={() => handleSectionTypeSelect("40")}
               />
               <ChakraCard
-                title="ยังไม่ได้ประกันสังคม"
+                title="ยังไม่ได้เข้าร่วมประกันสังคม"
                 description="แต่อยากแสดงความคิดเห็นเพื่อพัฒนาระบบ"
                 icon={<FiMessageSquare size={24} />}
                 benefits={[
