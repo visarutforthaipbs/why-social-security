@@ -220,7 +220,22 @@ export default function Home() {
   const handleSubmitFeedback = async () => {
     // For users who haven't selected a section, we don't require section validation
     if (selectedSection === null && currentSection === "suggestBenefits") {
-      // Proceed without section validation for non-registered users
+      // For non-registered users, at least require some suggestion in the text area
+      if (
+        !suggestedBenefits.other.trim() &&
+        !suggestedBenefits.healthcare &&
+        !suggestedBenefits.retirement &&
+        !suggestedBenefits.unemployment &&
+        !suggestedBenefits.disability
+      ) {
+        toast({
+          title: "กรุณาเลือกหรือระบุสิทธิประโยชน์ที่คุณต้องการ",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+        return;
+      }
     } else if (!selectedSection) {
       toast({
         title: "กรุณาเลือกประเภทประกันสังคมของคุณ",
@@ -1522,12 +1537,12 @@ export default function Home() {
               />
               <ChakraCard
                 title="ยังไม่ได้เข้าร่วมประกันสังคม"
-                description="แต่อยากแสดงความคิดเห็นเพื่อพัฒนาระบบ"
+                description="แต่อยากแสดงความคิดเห็นเพื่อพัฒนาประกันสังคม"
                 icon={<FiMessageSquare size={24} />}
                 benefits={[
                   "แสดงความคิดเห็นเพื่อปรับปรุงระบบประกันสังคม",
                   "มีส่วนร่วมในการพัฒนาสวัสดิการสังคม",
-                  "สะท้อนความต้องการของผู้ที่ยังไม่ได้ใช้ระบบ",
+                  "สะท้อนความต้องการของผู้ที่ยังไม่ได้อยู่ในระบบ",
                 ]}
                 gradientFrom="#4A90E2"
                 gradientTo="#4A90E2"

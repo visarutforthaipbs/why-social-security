@@ -41,49 +41,53 @@ export const saveFeedback = async (
   data: FeedbackData
 ): Promise<{ success: boolean; error?: string }> => {
   try {
-    // Validate required fields
-    if (!data.sectionType) {
-      return { success: false, error: "Missing section type" };
-    }
+    // For non-registered users, sectionType will be null
+    // Skip detailed validation for users who are not registered
 
-    // Basic validation for all section types
-    if (!data.userData.age || !data.userData.occupation) {
-      return { success: false, error: "Missing required user data" };
-    }
+    // For registered users, validate the required section-specific fields
+    if (data.sectionType !== null) {
+      // Basic validation for all section types
+      if (!data.userData.age || !data.userData.occupation) {
+        return { success: false, error: "Missing required user data" };
+      }
 
-    // Validate based on section type
-    if (data.sectionType === "39") {
-      // Section 39 validation
-      if (
-        !data.userData.yearsSection33 ||
-        !data.userData.monthsSection33 ||
-        !data.userData.monthlySection33 ||
-        !data.userData.yearsSection39 ||
-        !data.userData.monthsSection39
+      // Validate based on section type
+      if (data.sectionType === "39") {
+        // Section 39 validation
+        if (
+          !data.userData.yearsSection33 ||
+          !data.userData.monthsSection33 ||
+          !data.userData.monthlySection33 ||
+          !data.userData.yearsSection39 ||
+          !data.userData.monthsSection39
+        ) {
+          return { success: false, error: "Missing required Section 39 data" };
+        }
+      } else if (
+        data.sectionType === "40" ||
+        data.sectionType === "40-1" ||
+        data.sectionType === "40-2" ||
+        data.sectionType === "40-3"
       ) {
-        return { success: false, error: "Missing required Section 39 data" };
-      }
-    } else if (
-      data.sectionType === "40" ||
-      data.sectionType === "40-1" ||
-      data.sectionType === "40-2" ||
-      data.sectionType === "40-3"
-    ) {
-      // Section 40 validation
-      if (
-        !data.userData.yearsContributing ||
-        data.userData.monthsContributing === undefined ||
-        !data.userData.monthlyContribution
-      ) {
-        return { success: false, error: "Missing required Section 40 data" };
-      }
-    } else {
-      // Section 33 and others
-      if (
-        !data.userData.yearsContributing ||
-        !data.userData.monthlyContribution
-      ) {
-        return { success: false, error: "Missing required contribution data" };
+        // Section 40 validation
+        if (
+          !data.userData.yearsContributing ||
+          data.userData.monthsContributing === undefined ||
+          !data.userData.monthlyContribution
+        ) {
+          return { success: false, error: "Missing required Section 40 data" };
+        }
+      } else {
+        // Section 33 and others
+        if (
+          !data.userData.yearsContributing ||
+          !data.userData.monthlyContribution
+        ) {
+          return {
+            success: false,
+            error: "Missing required contribution data",
+          };
+        }
       }
     }
 

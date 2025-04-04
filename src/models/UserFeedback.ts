@@ -2,14 +2,14 @@ import mongoose, { Schema } from "mongoose";
 
 // Define the model interface
 export interface IUserFeedback {
-  sectionType: "33" | "39" | "40" | "40-1" | "40-2" | "40-3";
+  sectionType: "33" | "39" | "40" | "40-1" | "40-2" | "40-3" | null;
   userData: {
     name?: string;
     age: string;
     occupation: string;
-    yearsContributing: string;
+    yearsContributing?: string;
     monthsContributing?: string;
-    monthlyContribution: string;
+    monthlyContribution?: string;
     usedBenefits: string[];
     // Additional fields for Section 39
     yearsSection33?: string;
@@ -33,16 +33,17 @@ export interface IUserFeedback {
 const UserFeedbackSchema = new Schema<IUserFeedback>({
   sectionType: {
     type: String,
-    enum: ["33", "39", "40", "40-1", "40-2", "40-3"],
-    required: true,
+    enum: ["33", "39", "40", "40-1", "40-2", "40-3", null],
+    required: false,
+    default: null,
   },
   userData: {
     name: { type: String },
-    age: { type: String, required: true },
-    occupation: { type: String, required: true },
-    yearsContributing: { type: String, required: true },
+    age: { type: String, required: false },
+    occupation: { type: String, required: false },
+    yearsContributing: { type: String, required: false },
     monthsContributing: { type: String },
-    monthlyContribution: { type: String, required: true },
+    monthlyContribution: { type: String, required: false },
     usedBenefits: { type: [String], default: [] },
     // Additional fields for Section 39
     yearsSection33: { type: String },
