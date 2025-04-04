@@ -1213,13 +1213,17 @@ export default function Home() {
       <Box bg="background.main" py={{ base: 16, md: 24 }}>
         <Container maxW="3xl">
           <VStack textAlign="center" mb={8} spacing={4}>
-            <Heading as="h1" size="xl" mb={4}>
-              {selectedSection === null
-                ? "ประกันสังคมที่คุณอยากเห็น"
-                : "สำหรับคุณ &ldquo;ประกันสังคม&rdquo; ควรจะเป็นอะไร ?"}
-            </Heading>
+            {selectedSection === "notRegYet" ? (
+              <Heading as="h1" size="xl" mb={4}>
+                ประกันสังคมที่คุณอยากเห็น
+              </Heading>
+            ) : (
+              <Heading as="h1" size="xl" mb={4}>
+                สำหรับคุณ "ประกันสังคม" ควรจะเป็นอะไร ?
+              </Heading>
+            )}
             <Text variant="subtitle">
-              {selectedSection === null
+              {selectedSection === "notRegYet"
                 ? "แม้คุณยังไม่ได้ใช้ระบบประกันสังคม แต่ความคิดเห็นของคุณมีค่า"
                 : "เลือกสิทธิประโยชน์ที่คุณต้องการให้มีหรือปรับปรุงในระบบประกันสังคม"}
             </Text>
