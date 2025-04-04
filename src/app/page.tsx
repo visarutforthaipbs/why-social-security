@@ -9,6 +9,7 @@ import {
   FiChevronUp,
   FiChevronDown,
   FiCheck,
+  FiMessageSquare,
 } from "react-icons/fi";
 import Footer from "@/components/Footer";
 import { ChakraButton } from "@/components/ChakraButton";
@@ -217,7 +218,10 @@ export default function Home() {
 
   // Handler for submitting feedback to MongoDB
   const handleSubmitFeedback = async () => {
-    if (!selectedSection) {
+    // For users who haven't selected a section, we don't require section validation
+    if (selectedSection === null && currentSection === "suggestBenefits") {
+      // Proceed without section validation for non-registered users
+    } else if (!selectedSection) {
       toast({
         title: "กรุณาเลือกประเภทประกันสังคมของคุณ",
         status: "error",
@@ -1183,10 +1187,14 @@ export default function Home() {
         <Container maxW="3xl">
           <VStack textAlign="center" mb={8} spacing={4}>
             <Heading as="h1" size="xl" mb={4}>
-              สำหรับคุณ &ldquo;ประกันสังคม&rdquo; ควรจะเป็นอะไร ?
+              {selectedSection === null
+                ? "ประกันสังคมที่คุณอยากเห็น"
+                : "สำหรับคุณ &ldquo;ประกันสังคม&rdquo; ควรจะเป็นอะไร ?"}
             </Heading>
             <Text variant="subtitle">
-              เลือกสิทธิประโยชน์ที่คุณต้องการให้มีหรือปรับปรุงในระบบประกันสังคม
+              {selectedSection === null
+                ? "แม้คุณยังไม่ได้ใช้ระบบประกันสังคม แต่ความคิดเห็นของคุณมีค่า"
+                : "เลือกสิทธิประโยชน์ที่คุณต้องการให้มีหรือปรับปรุงในระบบประกันสังคม"}
             </Text>
           </VStack>
 
@@ -1264,11 +1272,17 @@ export default function Home() {
 
               <FormControl mb={6}>
                 <FormLabel>
-                  สิทธิประโยชน์ของประกันสังคมที่คุณต้องการ ?
+                  {selectedSection === null
+                    ? "คุณอยากเห็นระบบประกันสังคมเป็นอย่างไร?"
+                    : "สิทธิประโยชน์ของประกันสังคมที่คุณต้องการ ?"}
                 </FormLabel>
                 <Textarea
                   h="40"
-                  placeholder="ระบุสิทธิประโยชน์ที่คุณต้องการเพิ่มเติม..."
+                  placeholder={
+                    selectedSection === null
+                      ? "แชร์ความคิดเห็นของคุณเกี่ยวกับระบบประกันสังคมที่อยากเห็น..."
+                      : "ระบุสิทธิประโยชน์ที่คุณต้องการเพิ่มเติม..."
+                  }
                   value={suggestedBenefits.other}
                   onChange={(e) =>
                     updateSuggestedBenefits("other", e.target.value)
@@ -1279,7 +1293,11 @@ export default function Home() {
               <Flex gap={4} justify="flex-end" mt={8}>
                 <Button
                   variant="outline"
-                  onClick={() => navigateTo("userInput")}
+                  onClick={() =>
+                    selectedSection === null
+                      ? navigateTo("selection")
+                      : navigateTo("userInput")
+                  }
                   isDisabled={isSubmitting}
                 >
                   ย้อนกลับ
@@ -1421,6 +1439,13 @@ export default function Home() {
 
   // Section Selection
   const renderSelectionSection = () => {
+    // Handler for people who haven't registered yet
+    const handleNotRegisteredSelect = () => {
+      // Set a null selection type but still navigate to suggestions
+      setSelectedSection(null);
+      navigateTo("suggestBenefits");
+    };
+
     return (
       <Box bg="background.main" py={{ base: 16, md: 24 }}>
         <Container maxW="6xl">
@@ -1447,7 +1472,11 @@ export default function Home() {
               </a>
             </Flex>
             <Grid
-              templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }}
+              templateColumns={{
+                base: "1fr",
+                md: "repeat(2, 1fr)",
+                lg: "repeat(4, 1fr)",
+              }}
               gap={8}
               w="full"
             >
@@ -1490,6 +1519,19 @@ export default function Home() {
                 gradientFrom="#f3762a"
                 gradientTo="#f3762a"
                 onClick={() => handleSectionTypeSelect("40")}
+              />
+              <ChakraCard
+                title="ยังไม่ได้ประกันสังคม"
+                description="แต่อยากแสดงความคิดเห็นเพื่อพัฒนาระบบ"
+                icon={<FiMessageSquare size={24} />}
+                benefits={[
+                  "แสดงความคิดเห็นเพื่อปรับปรุงระบบประกันสังคม",
+                  "มีส่วนร่วมในการพัฒนาสวัสดิการสังคม",
+                  "สะท้อนความต้องการของผู้ที่ยังไม่ได้ใช้ระบบ",
+                ]}
+                gradientFrom="#4A90E2"
+                gradientTo="#4A90E2"
+                onClick={handleNotRegisteredSelect}
               />
             </Grid>
             <Box mt={4}>
