@@ -45,6 +45,8 @@ type Section =
   | "userInput"
   | "suggestBenefits"
   | "end";
+
+// Define section type for the social security section types
 type SectionType =
   | "33"
   | "39"
@@ -430,7 +432,7 @@ export default function Home() {
         "เงินบำเหน็จชราภาพ",
         "เงินสงเคราะห์บุตร",
       ],
-      notRegYet: [], // Empty array for non-registered users
+      notRegYet: [],
     };
 
     // Add detailed descriptions for each benefit
@@ -741,7 +743,7 @@ export default function Home() {
 
     // Get the relevant benefits for the selected section
     const getSectionBenefits = () => {
-      const benefits = {
+      const benefits: Record<Exclude<SectionType, null>, string[]> = {
         "33": [
           "กรณีเจ็บป่วย",
           "กรณีคลอดบุตร",
@@ -783,9 +785,12 @@ export default function Home() {
           "เงินบำเหน็จชราภาพ",
           "เงินสงเคราะห์บุตร",
         ],
+        notRegYet: [],
       };
 
-      return selectedSection ? benefits[selectedSection] : [];
+      return selectedSection
+        ? benefits[selectedSection as Exclude<SectionType, null>]
+        : [];
     };
 
     // Handle radio button change for section 40
@@ -883,9 +888,10 @@ export default function Home() {
                   >
                     {getSectionBenefits()
                       .filter(
-                        (benefit) => !userData.usedBenefits.includes(benefit)
+                        (benefit: string) =>
+                          !userData.usedBenefits.includes(benefit)
                       )
-                      .map((benefit, index) => (
+                      .map((benefit: string, index: number) => (
                         <Flex key={index} alignItems="center">
                           <Box
                             bg="gray.100"
@@ -1219,7 +1225,7 @@ export default function Home() {
               </Heading>
             ) : (
               <Heading as="h1" size="xl" mb={4}>
-                สำหรับคุณ "ประกันสังคม" ควรจะเป็นอะไร ?
+                สำหรับคุณ &ldquo;ประกันสังคม&rdquo; ควรจะเป็นอะไร ?
               </Heading>
             )}
             <Text variant="subtitle">
