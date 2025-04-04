@@ -2,7 +2,7 @@ import mongoose, { Schema } from "mongoose";
 
 // Define the model interface
 export interface IUserFeedback {
-  sectionType: "33" | "39" | "40" | "40-1" | "40-2" | "40-3" | null;
+  sectionType: "33" | "39" | "40" | "40-1" | "40-2" | "40-3" | "notRegYet";
   userData: {
     name?: string;
     age: string;
@@ -33,9 +33,9 @@ export interface IUserFeedback {
 const UserFeedbackSchema = new Schema<IUserFeedback>({
   sectionType: {
     type: String,
-    enum: ["33", "39", "40", "40-1", "40-2", "40-3", null],
+    enum: ["33", "39", "40", "40-1", "40-2", "40-3", "notRegYet"],
     required: false,
-    default: null,
+    default: "notRegYet",
   },
   userData: {
     name: { type: String },

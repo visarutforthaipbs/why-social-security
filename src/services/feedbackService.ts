@@ -1,6 +1,13 @@
 // Service for handling feedback data
 
-export type SectionType = "33" | "39" | "40" | "40-1" | "40-2" | "40-3" | null;
+export type SectionType =
+  | "33"
+  | "39"
+  | "40"
+  | "40-1"
+  | "40-2"
+  | "40-3"
+  | "notRegYet";
 
 export interface UserData {
   name: string;
@@ -41,11 +48,11 @@ export const saveFeedback = async (
   data: FeedbackData
 ): Promise<{ success: boolean; error?: string }> => {
   try {
-    // For non-registered users, sectionType will be null
+    // For non-registered users, sectionType will be "notRegYet"
     // Skip detailed validation for users who are not registered
 
     // For registered users, validate the required section-specific fields
-    if (data.sectionType !== null) {
+    if (data.sectionType !== "notRegYet") {
       // Basic validation for all section types
       if (!data.userData.age || !data.userData.occupation) {
         return { success: false, error: "Missing required user data" };

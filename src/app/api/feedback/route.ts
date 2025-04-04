@@ -42,9 +42,9 @@ export async function POST(req: Request) {
       );
     }
 
-    // For non-registered users, sectionType will be null
+    // For non-registered users, sectionType will be "notRegYet"
     // Skip detailed validation for users who are not registered
-    if (data.sectionType !== null) {
+    if (data.sectionType !== "notRegYet") {
       // Basic validation for all section types
       if (!data.userData.age || !data.userData.occupation) {
         return NextResponse.json(

@@ -45,7 +45,15 @@ type Section =
   | "userInput"
   | "suggestBenefits"
   | "end";
-type SectionType = "33" | "39" | "40" | "40-1" | "40-2" | "40-3" | null;
+type SectionType =
+  | "33"
+  | "39"
+  | "40"
+  | "40-1"
+  | "40-2"
+  | "40-3"
+  | "notRegYet"
+  | null;
 
 // Define benefit detail interface
 interface BenefitDetail {
@@ -219,7 +227,10 @@ export default function Home() {
   // Handler for submitting feedback to MongoDB
   const handleSubmitFeedback = async () => {
     // For users who haven't selected a section, we don't require section validation
-    if (selectedSection === null && currentSection === "suggestBenefits") {
+    if (
+      selectedSection === "notRegYet" &&
+      currentSection === "suggestBenefits"
+    ) {
       // For non-registered users, at least require some suggestion in the text area
       if (
         !suggestedBenefits.other.trim() &&
@@ -419,6 +430,7 @@ export default function Home() {
         "เงินบำเหน็จชราภาพ",
         "เงินสงเคราะห์บุตร",
       ],
+      notRegYet: [], // Empty array for non-registered users
     };
 
     // Add detailed descriptions for each benefit
@@ -1456,8 +1468,8 @@ export default function Home() {
   const renderSelectionSection = () => {
     // Handler for people who haven't registered yet
     const handleNotRegisteredSelect = () => {
-      // Set a null selection type but still navigate to suggestions
-      setSelectedSection(null);
+      // Set "notRegYet" as selection type and navigate to suggestions
+      setSelectedSection("notRegYet");
       navigateTo("suggestBenefits");
     };
 
