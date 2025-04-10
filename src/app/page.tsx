@@ -1537,10 +1537,12 @@ export default function Home() {
               <ChakraCard
                 title={
                   <VStack spacing={0} align="start">
-                    <Text fontSize="lg" fontWeight="bold">
+                    <Text fontSize="lg" fontWeight="bold" color="white">
                       มาตรา 33
                     </Text>
-                    <Text fontSize="sm">(ผู้ประกันตนภาคบังคับ)</Text>
+                    <Text fontSize="sm" color="white">
+                      (ผู้ประกันตนภาคบังคับ)
+                    </Text>
                   </VStack>
                 }
                 description="ลูกจ้าง พนักงานเอกชนทั่วไป "
@@ -1558,10 +1560,12 @@ export default function Home() {
               <ChakraCard
                 title={
                   <VStack spacing={0} align="start">
-                    <Text fontSize="lg" fontWeight="bold">
+                    <Text fontSize="lg" fontWeight="bold" color="white">
                       มาตรา 39
                     </Text>
-                    <Text fontSize="sm">(ผู้ประกันตนภาคสมัครใจ)</Text>
+                    <Text fontSize="sm" color="white">
+                      (ผู้ประกันตนภาคสมัครใจ)
+                    </Text>
                   </VStack>
                 }
                 description="เคยเป็นผู้ประกันตนในมาตรา 33 มาก่อน"
@@ -1577,10 +1581,12 @@ export default function Home() {
               <ChakraCard
                 title={
                   <VStack spacing={0} align="start">
-                    <Text fontSize="lg" fontWeight="bold">
+                    <Text fontSize="lg" fontWeight="bold" color="white">
                       มาตรา 40
                     </Text>
-                    <Text fontSize="sm">(ผู้ประกันตนนอกระบบ)</Text>
+                    <Text fontSize="sm" color="white">
+                      (ผู้ประกันตนนอกระบบ)
+                    </Text>
                   </VStack>
                 }
                 description="ประกอบอาชีพอิสระ หรือแรงงานนอกระบบ"
@@ -1598,19 +1604,17 @@ export default function Home() {
               <ChakraCard
                 title={
                   <VStack spacing={0} align="start">
-                    <Text fontSize="lg" fontWeight="bold">
+                    <Text fontSize="lg" color="white" fontWeight="bold">
                       ยังไม่ได้เข้าร่วม
                     </Text>
-                    <Text fontSize="sm">ประกันสังคม</Text>
+                    <Text fontSize="sm" color="white">
+                      ประกันสังคม
+                    </Text>
                   </VStack>
                 }
                 description="แต่อยากแสดงความคิดเห็นเพื่อพัฒนาประกันสังคม"
                 icon={<FiMessageSquare size={24} />}
-                benefits={[
-                  "แสดงความคิดเห็นเพื่อปรับปรุงระบบประกันสังคม",
-                  "มีส่วนร่วมในการพัฒนาสวัสดิการสังคม",
-                  "สะท้อนความต้องการของผู้ที่ยังไม่ได้อยู่ในระบบ",
-                ]}
+                benefits={[]}
                 gradientFrom="#4A90E2"
                 gradientTo="#4A90E2"
                 onClick={handleNotRegisteredSelect}
