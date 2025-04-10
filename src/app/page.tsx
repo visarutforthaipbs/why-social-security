@@ -1536,9 +1536,12 @@ export default function Home() {
             >
               <ChakraCard
                 title={
-                  <>
-                    มาตรา 33 <br /> (ผู้ประกันตนภาคบังคับ)
-                  </>
+                  <VStack spacing={0} align="start">
+                    <Text fontSize="lg" fontWeight="bold">
+                      มาตรา 33
+                    </Text>
+                    <Text fontSize="sm">(ผู้ประกันตนภาคบังคับ)</Text>
+                  </VStack>
                 }
                 description="ลูกจ้าง พนักงานเอกชนทั่วไป "
                 icon={<FiUser size={24} />}
@@ -1553,7 +1556,14 @@ export default function Home() {
                 onClick={() => handleSectionTypeSelect("33")}
               />
               <ChakraCard
-                title="มาตรา 39 (ผู้ประกันตนภาคสมัครใจ)"
+                title={
+                  <VStack spacing={0} align="start">
+                    <Text fontSize="lg" fontWeight="bold">
+                      มาตรา 39
+                    </Text>
+                    <Text fontSize="sm">(ผู้ประกันตนภาคสมัครใจ)</Text>
+                  </VStack>
+                }
                 description="เคยเป็นผู้ประกันตนในมาตรา 33 มาก่อน"
                 icon={<FiDollarSign size={24} />}
                 benefits={[
@@ -1565,7 +1575,14 @@ export default function Home() {
                 onClick={() => handleSectionTypeSelect("39")}
               />
               <ChakraCard
-                title="มาตรา 40 (ผู้ประกันตนนอกระบบ)"
+                title={
+                  <VStack spacing={0} align="start">
+                    <Text fontSize="lg" fontWeight="bold">
+                      มาตรา 40
+                    </Text>
+                    <Text fontSize="sm">(ผู้ประกันตนนอกระบบ)</Text>
+                  </VStack>
+                }
                 description="ประกอบอาชีพอิสระ หรือแรงงานนอกระบบ"
                 icon={<FiHeart size={24} />}
                 benefits={[
@@ -1579,7 +1596,14 @@ export default function Home() {
                 onClick={() => handleSectionTypeSelect("40")}
               />
               <ChakraCard
-                title="ยังไม่ได้เข้าร่วมประกันสังคม"
+                title={
+                  <VStack spacing={0} align="start">
+                    <Text fontSize="lg" fontWeight="bold">
+                      ยังไม่ได้เข้าร่วม
+                    </Text>
+                    <Text fontSize="sm">ประกันสังคม</Text>
+                  </VStack>
+                }
                 description="แต่อยากแสดงความคิดเห็นเพื่อพัฒนาประกันสังคม"
                 icon={<FiMessageSquare size={24} />}
                 benefits={[
