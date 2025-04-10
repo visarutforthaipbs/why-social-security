@@ -5,7 +5,7 @@ import { FiCheck } from "react-icons/fi";
 import { ReactNode } from "react";
 
 interface ChakraCardProps {
-  title: string;
+  title: ReactNode;
   description: ReactNode;
   icon?: ReactNode;
   benefits?: string[];
