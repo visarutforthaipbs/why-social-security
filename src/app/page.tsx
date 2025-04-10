@@ -1307,6 +1307,7 @@ export default function Home() {
                     รัฐสวัสดิการที่ดูแลทุกช่วงวัย
                   </Text>
                 </Checkbox>
+
                 {/* New Heading */}
                 <Text fontSize="lg" fontWeight="bold" mt={4}>
                   หรือคุณคิดว่าประกันสังคมควรจะเป็นอะไร
@@ -1534,7 +1535,11 @@ export default function Home() {
               w="full"
             >
               <ChakraCard
-                title="มาตรา 33 (ผู้ประกันตนภาคบังคับ)"
+                title={
+                  <>
+                    มาตรา 33 <br /> (ผู้ประกันตนภาคบังคับ)
+                  </>
+                }
                 description="ลูกจ้าง พนักงานเอกชนทั่วไป "
                 icon={<FiUser size={24} />}
                 benefits={[
