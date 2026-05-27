@@ -33,8 +33,10 @@ import {
   SimpleGrid,
   Checkbox,
   Textarea,
+  Tooltip,
 } from "@chakra-ui/react";
 import { saveFeedback } from "@/services/feedbackService";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Define section types for type safety
 type Section =
@@ -750,20 +752,6 @@ export default function Home() {
 
   // User Input Section
   const renderUserInputSection = () => {
-    // Calculate total contribution (if values exist)
-    const calculateTotalContribution = () => {
-      if (userData.yearsContributing && userData.monthlyContribution) {
-        const years = parseFloat(userData.yearsContributing) || 0;
-        const months = parseFloat(userData.monthsContributing || "0");
-        const monthly = parseFloat(userData.monthlyContribution);
-        if (!isNaN(years) && !isNaN(months) && !isNaN(monthly)) {
-          const totalMonths = years * 12 + months;
-          return (totalMonths * monthly).toLocaleString("th-TH");
-        }
-      }
-      return "0";
-    };
-
     // Get the relevant benefits for the selected section
     const getSectionBenefits = () => {
       const benefits: Record<Exclude<SectionType, null>, string[]> = {
@@ -819,33 +807,6 @@ export default function Home() {
     // Handle radio button change for section 40
     const handleRadioChange = (value: string) => {
       updateUserData({ monthlyContribution: value });
-    };
-
-    // Add new calculation function for section 39
-    const calculateTotalContributionSection39 = () => {
-      if (selectedSection === "39") {
-        const years33 = parseFloat(userData.yearsSection33 || "0");
-        const months33 = parseFloat(userData.monthsSection33 || "0");
-        const monthly33 = parseFloat(userData.monthlySection33 || "0");
-        const years39 = parseFloat(userData.yearsSection39 || "0");
-        const months39 = parseFloat(userData.monthsSection39 || "0");
-        const monthly39 = 432; // Fixed rate for section 39
-
-        if (
-          !isNaN(years33) &&
-          !isNaN(months33) &&
-          !isNaN(monthly33) &&
-          !isNaN(years39) &&
-          !isNaN(months39)
-        ) {
-          const totalMonths33 = years33 * 12 + months33;
-          const totalMonths39 = years39 * 12 + months39;
-          const total33 = totalMonths33 * monthly33;
-          const total39 = totalMonths39 * monthly39;
-          return (total33 + total39).toLocaleString("th-TH");
-        }
-      }
-      return "0";
     };
 
     return (
@@ -1159,66 +1120,8 @@ export default function Home() {
                 </FormControl>
               )}
 
-              {/* Show calculation of total contribution */}
-              {selectedSection === "39" ? (
-                <Box
-                  bg="subtle.50"
-                  p={4}
-                  borderRadius="md"
-                  borderLeft="4px solid"
-                  borderColor="accent.500"
-                  mb={6}
-                  mt={4}
-                >
-                  <Text fontWeight="medium">
-                    คุณจ่ายเงินเข้าประกันสังคมไปแล้วทั้งหมดประมาณ{" "}
-                    {calculateTotalContributionSection39()} บาท
-                  </Text>
-                  <Text fontSize="sm" mt={2}>
-                    คำนวณจาก:
-                    <br />• มาตรา 33: {userData.yearsSection33} ปี{" "}
-                    {userData.monthsSection33
-                      ? `และ ${userData.monthsSection33} เดือน`
-                      : ""}{" "}
-                    ×{" "}
-                    {parseFloat(
-                      userData.monthlySection33 || "0"
-                    ).toLocaleString("th-TH")}{" "}
-                    บาท
-                    <br />• มาตรา 39: {userData.yearsSection39} ปี{" "}
-                    {userData.monthsSection39
-                      ? `และ ${userData.monthsSection39} เดือน`
-                      : ""}{" "}
-                    × 432 บาท
-                  </Text>
-                </Box>
-              ) : (
-                <Box
-                  bg="subtle.50"
-                  p={4}
-                  borderRadius="md"
-                  borderLeft="4px solid"
-                  borderColor="accent.500"
-                  mb={6}
-                  mt={4}
-                >
-                  <Text fontWeight="medium">
-                    คุณจ่ายเงินเข้าประกันสังคมไปแล้วทั้งหมดประมาณ{" "}
-                    {calculateTotalContribution()} บาท
-                  </Text>
-                  <Text fontSize="sm" mt={2}>
-                    คำนวณจาก {userData.yearsContributing} ปี{" "}
-                    {userData.monthsContributing
-                      ? `และ ${userData.monthsContributing} เดือน`
-                      : ""}{" "}
-                    ×{" "}
-                    {parseFloat(userData.monthlyContribution).toLocaleString(
-                      "th-TH"
-                    )}{" "}
-                    บาท
-                  </Text>
-                </Box>
-              )}
+              {/* Show visual calculation of total contribution */}
+              {renderContributionVisualizer()}
 
               <Flex gap={4} justify="flex-end" mt={8}>
                 <Button
@@ -1439,73 +1342,86 @@ export default function Home() {
           แบบ กรุณาเลือกแบบที่ต้องการ:
         </Text>
 
-        <SimpleGrid columns={[1, null, 3]} spacing={4}>
-          <ChakraCard
-            title="ทางเลือกที่ 1"
-            description={
-              <>
-                <Text fontWeight="bold" mb={2}>
-                  จ่ายเงินสมทบ 70 บาท/เดือน
-                </Text>
-                <Text mb={3}>คุณจะได้รับสิทธิประโยชน์ 3 กรณี:</Text>
-                <VStack spacing={2} align="stretch">
-                  <CheckedListItem text="เงินทดแทนการขาดรายได้ กรณีประสบอันตรายหรือเจ็บป่วย" />
-                  <CheckedListItem text="เงินทดแทนการขาดรายได้ กรณีทุพพลภาพ" />
-                  <CheckedListItem text="เงินค่าทำศพ กรณีเสียชีวิต หรือเงินสงเคราะห์กรณีตาย" />
-                </VStack>
-              </>
-            }
-            benefits={[]}
-            gradientFrom="#f3762a"
-            gradientTo="#f3762a"
-            onClick={() => handleSection40OptionSelect("40-1")}
-          />
+        <motion.div
+          variants={staggerContainer}
+          initial="hidden"
+          animate="show"
+          style={{ width: "100%" }}
+        >
+          <SimpleGrid columns={[1, null, 3]} spacing={6}>
+            <motion.div variants={staggerItem}>
+              <ChakraCard
+                title="ทางเลือกที่ 1"
+                description={
+                  <>
+                    <Text fontWeight="bold" mb={2}>
+                      จ่ายเงินสมทบ 70 บาท/เดือน
+                    </Text>
+                    <Text mb={3}>คุณจะได้รับสิทธิประโยชน์ 3 กรณี:</Text>
+                    <VStack spacing={2} align="stretch">
+                      <CheckedListItem text="เงินทดแทนการขาดรายได้ กรณีประสบอันตรายหรือเจ็บป่วย" />
+                      <CheckedListItem text="เงินทดแทนการขาดรายได้ กรณีทุพพลภาพ" />
+                      <CheckedListItem text="เงินค่าทำศพ กรณีเสียชีวิต หรือเงินสงเคราะห์กรณีตาย" />
+                    </VStack>
+                  </>
+                }
+                benefits={[]}
+                gradientFrom="#f3762a"
+                gradientTo="#f3762a"
+                onClick={() => handleSection40OptionSelect("40-1")}
+              />
+            </motion.div>
 
-          <ChakraCard
-            title="ทางเลือกที่ 2"
-            description={
-              <>
-                <Text fontWeight="bold" mb={2}>
-                  จ่ายเงินสมทบ 100 บาท/เดือน
-                </Text>
-                <Text mb={3}>คุณจะได้รับสิทธิประโยชน์ 4 กรณี:</Text>
-                <VStack spacing={2} align="stretch">
-                  <CheckedListItem text="เงินทดแทนการขาดรายได้ กรณีประสบอันตรายหรือเจ็บป่วย" />
-                  <CheckedListItem text="เงินทดแทนการขาดรายได้ กรณีทุพพลภาพ" />
-                  <CheckedListItem text="เงินค่าทำศพ กรณีเสียชีวิต หรือเงินสงเคราะห์กรณีตาย" />
-                  <CheckedListItem text="เงินบำเหน็จชราภาพ" />
-                </VStack>
-              </>
-            }
-            benefits={[]}
-            gradientFrom="#f3762a"
-            gradientTo="#f3762a"
-            onClick={() => handleSection40OptionSelect("40-2")}
-          />
+            <motion.div variants={staggerItem}>
+              <ChakraCard
+                title="ทางเลือกที่ 2"
+                description={
+                  <>
+                    <Text fontWeight="bold" mb={2}>
+                      จ่ายเงินสมทบ 100 บาท/เดือน
+                    </Text>
+                    <Text mb={3}>คุณจะได้รับสิทธิประโยชน์ 4 กรณี:</Text>
+                    <VStack spacing={2} align="stretch">
+                      <CheckedListItem text="เงินทดแทนการขาดรายได้ กรณีประสบอันตรายหรือเจ็บป่วย" />
+                      <CheckedListItem text="เงินทดแทนการขาดรายได้ กรณีทุพพลภาพ" />
+                      <CheckedListItem text="เงินค่าทำศพ กรณีเสียชีวิต หรือเงินสงเคราะห์กรณีตาย" />
+                      <CheckedListItem text="เงินบำเหน็จชราภาพ" />
+                    </VStack>
+                  </>
+                }
+                benefits={[]}
+                gradientFrom="#f3762a"
+                gradientTo="#f3762a"
+                onClick={() => handleSection40OptionSelect("40-2")}
+              />
+            </motion.div>
 
-          <ChakraCard
-            title="ทางเลือกที่ 3"
-            description={
-              <>
-                <Text fontWeight="bold" mb={2}>
-                  จ่ายเงินสมทบ 300 บาท/เดือน
-                </Text>
-                <Text mb={3}>คุณจะได้รับสิทธิประโยชน์ 5 กรณี:</Text>
-                <VStack spacing={2} align="stretch">
-                  <CheckedListItem text="เงินทดแทนการขาดรายได้ กรณีประสบอันตรายหรือเจ็บป่วย" />
-                  <CheckedListItem text="เงินทดแทนการขาดรายได้ กรณีทุพพลภาพ" />
-                  <CheckedListItem text="เงินค่าทำศพ กรณีเสียชีวิต หรือเงินสงเคราะห์กรณีตาย" />
-                  <CheckedListItem text="เงินบำเหน็จชราภาพ" />
-                  <CheckedListItem text="เงินสงเคราะห์บุตร" />
-                </VStack>
-              </>
-            }
-            benefits={[]}
-            gradientFrom="#f3762a"
-            gradientTo="#f3762a"
-            onClick={() => handleSection40OptionSelect("40-3")}
-          />
-        </SimpleGrid>
+            <motion.div variants={staggerItem}>
+              <ChakraCard
+                title="ทางเลือกที่ 3"
+                description={
+                  <>
+                    <Text fontWeight="bold" mb={2}>
+                      จ่ายเงินสมทบ 300 บาท/เดือน
+                    </Text>
+                    <Text mb={3}>คุณจะได้รับสิทธิประโยชน์ 5 กรณี:</Text>
+                    <VStack spacing={2} align="stretch">
+                      <CheckedListItem text="เงินทดแทนการขาดรายได้ กรณีประสบอันตรายหรือเจ็บป่วย" />
+                      <CheckedListItem text="เงินทดแทนการขาดรายได้ กรณีทุพพลภาพ" />
+                      <CheckedListItem text="เงินค่าทำศพ กรณีเสียชีวิต หรือเงินสงเคราะห์กรณีตาย" />
+                      <CheckedListItem text="เงินบำเหน็จชราภาพ" />
+                      <CheckedListItem text="เงินสงเคราะห์บุตร" />
+                    </VStack>
+                  </>
+                }
+                benefits={[]}
+                gradientFrom="#f3762a"
+                gradientTo="#f3762a"
+                onClick={() => handleSection40OptionSelect("40-3")}
+              />
+            </motion.div>
+          </SimpleGrid>
+        </motion.div>
       </Box>
     );
   };
@@ -1544,101 +1460,121 @@ export default function Home() {
                 อ่านข้อมูลเพิ่ม (ThaiPBS)
               </a>
             </Flex>
-            <Grid
-              templateColumns={{
-                base: "1fr",
-                md: "repeat(2, 1fr)",
-                lg: "repeat(4, 1fr)",
-              }}
-              gap={8}
-              w="full"
+
+            <motion.div
+              variants={staggerContainer}
+              initial="hidden"
+              animate="show"
+              style={{ width: "100%" }}
             >
-              <ChakraCard
-                title={
-                  <VStack spacing={0} align="start">
-                    <Text fontSize="lg" fontWeight="bold" color="white">
-                      มาตรา 33
-                    </Text>
-                    <Text fontSize="sm" color="white">
-                      (ผู้ประกันตนภาคบังคับ)
-                    </Text>
-                  </VStack>
-                }
-                description="ลูกจ้าง พนักงานเอกชนทั่วไป "
-                icon={<FiUser size={24} />}
-                benefits={[
-                  "ได้รับความคุ้มครอง 7 กรณี",
-                  "สิทธิในการทำทันตกรรม ไม่เกิน 900 บาท/ปี ",
-                  "ตรวจสุขภาพประจำปี",
-                  "ใช้ลดหย่อนภาษี",
-                ]}
-                gradientFrom="#3d3a7e"
-                gradientTo="#3d3a7e"
-                onClick={() => handleSectionTypeSelect("33")}
-              />
-              <ChakraCard
-                title={
-                  <VStack spacing={0} align="start">
-                    <Text fontSize="lg" fontWeight="bold" color="white">
-                      มาตรา 39
-                    </Text>
-                    <Text fontSize="sm" color="white">
-                      (ผู้ประกันตนภาคสมัครใจ)
-                    </Text>
-                  </VStack>
-                }
-                description="เคยเป็นผู้ประกันตนในมาตรา 33 มาก่อน"
-                icon={<FiDollarSign size={24} />}
-                benefits={[
-                  "ได้รับความคุ้มครอง 6 กรณี (ยกเว้นกรณีว่างงาน)",
-                  "ใช้ลดหย่อนภาษี",
-                ]}
-                gradientFrom="#e0c927"
-                gradientTo="#e0c927"
-                onClick={() => handleSectionTypeSelect("39")}
-              />
-              <ChakraCard
-                title={
-                  <VStack spacing={0} align="start">
-                    <Text fontSize="lg" fontWeight="bold" color="white">
-                      มาตรา 40
-                    </Text>
-                    <Text fontSize="sm" color="white">
-                      (ผู้ประกันตนนอกระบบ)
-                    </Text>
-                  </VStack>
-                }
-                description="ประกอบอาชีพอิสระ หรือแรงงานนอกระบบ"
-                icon={<FiHeart size={24} />}
-                benefits={[
-                  "มี 3 ทางเลือกชุดสิทธิประโยชน์ เลือกจ่ายเงินสมทบได้",
-                  "ออมเพิ่มกรณีชราภาพได้",
-                  "ได้เงินชราภาพเมื่ออายุ 60 ปีบริบูรณ์ (เงินบำเหน็จ)",
-                  "ใช้ลดหย่อนภาษี",
-                ]}
-                gradientFrom="#f3762a"
-                gradientTo="#f3762a"
-                onClick={() => handleSectionTypeSelect("40")}
-              />
-              <ChakraCard
-                title={
-                  <VStack spacing={0} align="start">
-                    <Text fontSize="lg" color="white" fontWeight="bold">
-                      ยังไม่ได้เข้าร่วม
-                    </Text>
-                    <Text fontSize="sm" color="white">
-                      ประกันสังคม
-                    </Text>
-                  </VStack>
-                }
-                description="แต่อยากแสดงความคิดเห็นเพื่อพัฒนาประกันสังคม"
-                icon={<FiMessageSquare size={24} />}
-                benefits={[]}
-                gradientFrom="#4A90E2"
-                gradientTo="#4A90E2"
-                onClick={handleNotRegisteredSelect}
-              />
-            </Grid>
+              <Grid
+                templateColumns={{
+                  base: "1fr",
+                  md: "repeat(2, 1fr)",
+                  lg: "repeat(4, 1fr)",
+                }}
+                gap={8}
+                w="full"
+              >
+                <motion.div variants={staggerItem}>
+                  <ChakraCard
+                    title={
+                      <VStack spacing={0} align="start">
+                        <Text fontSize="lg" fontWeight="bold" color="white">
+                          มาตรา 33
+                        </Text>
+                        <Text fontSize="sm" color="white">
+                          (ผู้ประกันตนภาคบังคับ)
+                        </Text>
+                      </VStack>
+                    }
+                    description="ลูกจ้าง พนักงานเอกชนทั่วไป "
+                    icon={<FiUser size={24} />}
+                    benefits={[
+                      "ได้รับความคุ้มครอง 7 กรณี",
+                      "สิทธิในการทำทันตกรรม ไม่เกิน 900 บาท/ปี ",
+                      "ตรวจสุขภาพประจำปี",
+                      "ใช้ลดหย่อนภาษี",
+                    ]}
+                    gradientFrom="#3d3a7e"
+                    gradientTo="#3d3a7e"
+                    onClick={() => handleSectionTypeSelect("33")}
+                  />
+                </motion.div>
+
+                <motion.div variants={staggerItem}>
+                  <ChakraCard
+                    title={
+                      <VStack spacing={0} align="start">
+                        <Text fontSize="lg" fontWeight="bold" color="white">
+                          มาตรา 39
+                        </Text>
+                        <Text fontSize="sm" color="white">
+                          (ผู้ประกันตนภาคสมัครใจ)
+                        </Text>
+                      </VStack>
+                    }
+                    description="เคยเป็นผู้ประกันตนในมาตรา 33 มาก่อน"
+                    icon={<FiDollarSign size={24} />}
+                    benefits={[
+                      "ได้รับความคุ้มครอง 6 กรณี (ยกเว้นกรณีว่างงาน)",
+                      "ใช้ลดหย่อนภาษี",
+                    ]}
+                    gradientFrom="#e0c927"
+                    gradientTo="#e0c927"
+                    onClick={() => handleSectionTypeSelect("39")}
+                  />
+                </motion.div>
+
+                <motion.div variants={staggerItem}>
+                  <ChakraCard
+                    title={
+                      <VStack spacing={0} align="start">
+                        <Text fontSize="lg" fontWeight="bold" color="white">
+                          มาตรา 40
+                        </Text>
+                        <Text fontSize="sm" color="white">
+                          (ผู้ประกันตนนอกระบบ)
+                        </Text>
+                      </VStack>
+                    }
+                    description="ประกอบอาชีพอิสระ หรือแรงงานนอกระบบ"
+                    icon={<FiHeart size={24} />}
+                    benefits={[
+                      "มี 3 ทางเลือกชุดสิทธิประโยชน์ เลือกจ่ายเงินสมทบได้",
+                      "ออมเพิ่มกรณีชราภาพได้",
+                      "ได้เงินชราภาพเมื่ออายุ 60 ปีบริบูรณ์ (เงินบำเหน็จ)",
+                      "ใช้ลดหย่อนภาษี",
+                    ]}
+                    gradientFrom="#f3762a"
+                    gradientTo="#f3762a"
+                    onClick={() => handleSectionTypeSelect("40")}
+                  />
+                </motion.div>
+
+                <motion.div variants={staggerItem}>
+                  <ChakraCard
+                    title={
+                      <VStack spacing={0} align="start">
+                        <Text fontSize="lg" color="white" fontWeight="bold">
+                          ยังไม่ได้เข้าร่วม
+                        </Text>
+                        <Text fontSize="sm" color="white">
+                          ประกันสังคม
+                        </Text>
+                      </VStack>
+                    }
+                    description="แต่อยากแสดงความคิดเห็นเพื่อพัฒนาประกันสังคม"
+                    icon={<FiMessageSquare size={24} />}
+                    benefits={[]}
+                    gradientFrom="#4A90E2"
+                    gradientTo="#4A90E2"
+                    onClick={handleNotRegisteredSelect}
+                  />
+                </motion.div>
+              </Grid>
+            </motion.div>
+
             <Box mt={4}>
               <ChakraButton
                 text="กลับไปหน้าหลัก"
@@ -1652,12 +1588,301 @@ export default function Home() {
     );
   };
 
+  // Motion variants for stagger entry
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.12,
+      },
+    },
+  };
+
+  const staggerItem = {
+    hidden: { opacity: 0, y: 20 },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 120,
+        damping: 18,
+      },
+    },
+  };
+
+  // Visual dynamic contribution breakdown widget
+  const renderContributionVisualizer = () => {
+    let totalSum = 0;
+    const breakdown: Array<{ label: string; value: number; color: string }> = [];
+
+    if (selectedSection === "39") {
+      const years33 = parseFloat(userData.yearsSection33 || "0") || 0;
+      const months33 = parseFloat(userData.monthsSection33 || "0") || 0;
+      const monthly33 = parseFloat(userData.monthlySection33 || "0") || 0;
+      const years39 = parseFloat(userData.yearsSection39 || "0") || 0;
+      const months39 = parseFloat(userData.monthsSection39 || "0") || 0;
+      const monthly39 = 432;
+
+      const tMonths33 = years33 * 12 + months33;
+      const tMonths39 = years39 * 12 + months39;
+      const total33 = tMonths33 * monthly33;
+      const total39 = tMonths39 * monthly39;
+      totalSum = total33 + total39;
+
+      if (totalSum > 0) {
+        if (total33 > 0) {
+          breakdown.push({
+            label: `มาตรา 33 (${years33} ปี ${months33 > 0 ? `${months33} เดือน` : ""})`,
+            value: total33,
+            color: "#3D3A7E",
+          });
+        }
+        if (total39 > 0) {
+          breakdown.push({
+            label: `มาตรา 39 (${years39} ปี ${months39 > 0 ? `${months39} เดือน` : ""})`,
+            value: total39,
+            color: "#e0c927",
+          });
+        }
+      }
+    } else {
+      const years = parseFloat(userData.yearsContributing || "0") || 0;
+      const months = parseFloat(userData.monthsContributing || "0") || 0;
+      const monthly = parseFloat(userData.monthlyContribution || "0") || 0;
+      const tMonths = years * 12 + months;
+      totalSum = tMonths * monthly;
+
+      if (totalSum > 0) {
+        const sectionName =
+          selectedSection === "33"
+            ? "มาตรา 33"
+            : selectedSection === "40-1"
+            ? "มาตรา 40 ทางเลือกที่ 1"
+            : selectedSection === "40-2"
+            ? "มาตรา 40 ทางเลือกที่ 2"
+            : selectedSection === "40-3"
+            ? "มาตรา 40 ทางเลือกที่ 3"
+            : "มาตรา 40";
+
+        const labelColor =
+          selectedSection === "33"
+            ? "#3D3A7E"
+            : "#f3762a";
+
+        breakdown.push({
+          label: `${sectionName} (${years} ปี ${months > 0 ? `${months} เดือน` : ""})`,
+          value: totalSum,
+          color: labelColor,
+        });
+      }
+    }
+
+    if (totalSum === 0) return null;
+
+    return (
+      <Box
+        bg="white"
+        borderWidth="1px"
+        borderRadius="xl"
+        borderColor="gray.200"
+        p={6}
+        shadow="md"
+        mb={6}
+        mt={4}
+        position="relative"
+        overflow="hidden"
+        _before={{
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: "4px",
+          bgGradient: "linear(to-r, primary.500, accent.500)",
+        }}
+      >
+        <VStack align="stretch" spacing={5}>
+          <Flex justify="space-between" align="baseline" direction={{ base: "column", sm: "row" }} gap={2}>
+            <Text fontSize="md" fontWeight="bold" color="gray.600">
+              ยอดเงินจ่ายสะสมทั้งหมดโดยประมาณ
+            </Text>
+            <Heading size="lg" color="primary.500" fontWeight="extrabold">
+              {totalSum.toLocaleString("th-TH")}{" "}
+              <Text as="span" fontSize="md" fontWeight="bold" color="gray.500">
+                บาท
+              </Text>
+            </Heading>
+          </Flex>
+
+          {/* Visual Progress Bar Chart */}
+          <Box h="4" w="full" bg="gray.100" borderRadius="full" overflow="hidden" display="flex">
+            {breakdown.map((item, idx) => {
+              const pct = (item.value / totalSum) * 100;
+              return (
+                <Tooltip key={idx} label={`${item.label}: ${item.value.toLocaleString("th-TH")} บาท`} hasArrow>
+                  <Box
+                    w={`${pct}%`}
+                    h="full"
+                    bg={item.color}
+                    transition="width 1s ease"
+                  />
+                </Tooltip>
+              );
+            })}
+          </Box>
+
+          {/* Labels and Detailed Legend */}
+          <Grid templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)" }} gap={4}>
+            {breakdown.map((item, idx) => {
+              const pct = Math.round((item.value / totalSum) * 100);
+              return (
+                <Flex key={idx} align="center" gap={3} p={2} borderRadius="lg" bg="gray.50" borderWidth="1px" borderColor="gray.100">
+                  <Box w="3" h="3" borderRadius="full" bg={item.color} flexShrink={0} />
+                  <Box>
+                    <Text fontSize="xs" color="gray.500" fontWeight="bold" noOfLines={1}>
+                      {item.label}
+                    </Text>
+                    <Text fontSize="sm" fontWeight="extrabold" color="gray.800">
+                      {item.value.toLocaleString("th-TH")} บาท ({pct}%)
+                    </Text>
+                  </Box>
+                </Flex>
+              );
+            })}
+          </Grid>
+
+          {/* Note breakdown */}
+          <Box borderTopWidth="1px" borderColor="gray.100" pt={3}>
+            <Text fontSize="xs" color="gray.400" lineHeight="relaxed">
+              * คำนวณประมาณการสะสมจากจำนวนปีและอัตราส่งต่อเดือนที่คุณระบุ
+              ตัวเลขนี้ไม่รวมผลประโยชน์ตอบแทนรายปี ดอกผลสะสม และเงินช่วยเหลือสมทบเพิ่มเติมจากนายจ้างหรือรัฐบาล
+            </Text>
+          </Box>
+        </VStack>
+      </Box>
+    );
+  };
+
+  // Defined steps for the stepper
+  const steps = selectedSection === "notRegYet"
+    ? [
+        { id: 1, label: "เลือกมาตรา", sections: ["selection"] },
+        { id: 2, label: "ร่วมเสนอแนะ", sections: ["suggestBenefits"] },
+      ]
+    : [
+        { id: 1, label: "เลือกมาตรา", sections: ["selection", "section40Options"] },
+        { id: 2, label: "สิทธิประโยชน์", sections: ["currentBenefits"] },
+        { id: 3, label: "คำนวณเงินสะสม", sections: ["userInput"] },
+        { id: 4, label: "ร่วมเสนอแนะ", sections: ["suggestBenefits"] },
+      ];
+
+  const renderStepper = () => {
+    if (currentSection === "home" || currentSection === "end") return null;
+
+    const activeStep = steps.findIndex(step => step.sections.includes(currentSection)) + 1;
+
+    return (
+      <Container maxW="3xl" my={{ base: 4, md: 8 }}>
+        <Flex justify="space-between" align="center" position="relative" px={2}>
+          {/* Background Track */}
+          <Box
+            position="absolute"
+            top="50%"
+            left="4%"
+            right="4%"
+            h="2px"
+            bg="gray.200"
+            zIndex={1}
+            transform="translateY(-50%)"
+          />
+          {/* Active Track Progress */}
+          <Box
+            position="absolute"
+            top="50%"
+            left="4%"
+            h="2px"
+            bg="primary.500"
+            zIndex={2}
+            transform="translateY(-50%)"
+            transition="all 0.5s cubic-bezier(0.4, 0, 0.2, 1)"
+            width={activeStep > 1 ? `${((activeStep - 1) / (steps.length - 1)) * 92}%` : "0%"}
+          />
+
+          {steps.map((step) => {
+            const isCompleted = activeStep > step.id;
+            const isActive = activeStep === step.id;
+
+            return (
+              <Flex
+                key={step.id}
+                direction="column"
+                align="center"
+                zIndex={3}
+                position="relative"
+              >
+                {/* Step Circle */}
+                <Flex
+                  w={{ base: 8, md: 10 }}
+                  h={{ base: 8, md: 10 }}
+                  borderRadius="full"
+                  bg={isCompleted ? "primary.500" : isActive ? "white" : "gray.100"}
+                  border="2px solid"
+                  borderColor={isCompleted || isActive ? "primary.500" : "gray.300"}
+                  align="center"
+                  justify="center"
+                  color={isCompleted ? "white" : isActive ? "primary.500" : "gray.400"}
+                  fontWeight="bold"
+                  fontSize={{ base: "xs", md: "sm" }}
+                  transition="all 0.3s ease"
+                  shadow={isActive ? "md" : "none"}
+                >
+                  {isCompleted ? (
+                    <Icon as={FiCheck} boxSize={4} />
+                  ) : (
+                    step.id
+                  )}
+                </Flex>
+                {/* Step Label */}
+                <Text
+                  mt={2}
+                  fontSize={{ base: "xs", md: "sm" }}
+                  fontWeight={isActive ? "bold" : "semibold"}
+                  color={isActive ? "primary.500" : isCompleted ? "gray.600" : "gray.400"}
+                  textAlign="center"
+                  whiteSpace="nowrap"
+                  display={{ base: "none", sm: "block" }}
+                >
+                  {step.label}
+                </Text>
+              </Flex>
+            );
+          })}
+        </Flex>
+      </Container>
+    );
+  };
+
   return (
     <>
-      <Box as="main" pb={{ base: 8, md: 10 }}>
-        {renderSection()}
+      <Box as="main" pb={{ base: 8, md: 10 }} overflow="hidden">
+        {renderStepper()}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentSection}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.35, ease: "easeInOut" }}
+          >
+            {renderSection()}
+          </motion.div>
+        </AnimatePresence>
       </Box>
       <Footer />
     </>
   );
 }
+
+
