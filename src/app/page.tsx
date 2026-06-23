@@ -10,6 +10,9 @@ import {
   FiChevronDown,
   FiCheck,
   FiMessageSquare,
+  FiTarget,
+  FiAlertTriangle,
+  FiInfo,
 } from "react-icons/fi";
 import Footer from "@/components/Footer";
 import { ChakraButton } from "@/components/ChakraButton";
@@ -814,10 +817,10 @@ export default function Home() {
         <Container maxW="3xl">
           <VStack textAlign="center" mb={8} spacing={4}>
             <Heading as="h1" size="xl" mb={4}>
-              คุณใช้สิทธิไป {userData.usedBenefits.length} อย่าง
+              แล้วตอนเกษียณ คุณจะได้อะไรกลับคืนบ้าง?
             </Heading>
             <Text variant="subtitle">
-              คุณจ่ายเงินมาแล้วกี่ปี จ่ายไปเท่าไรแล้ว รู้หรือเปล่า?
+              กรอกระยะเวลาที่คุณส่งเงินสมทบ เพื่อประมาณการเงินกรณีชราภาพที่คุณจะได้รับ
             </Text>
           </VStack>
 
@@ -1612,74 +1615,332 @@ export default function Home() {
     },
   };
 
-  // Visual dynamic contribution breakdown widget
+  // Dynamic retirement-benefit estimate widget.
+  // Reframes the old "money you paid in" view into "money you will get back at
+  // retirement (กรณีชราภาพ)". Pure frontend calculation off the existing
+  // userData fields — no schema / API change.
   const renderContributionVisualizer = () => {
-    let totalSum = 0;
+    const headline = "ยอดเงินกรณีชราภาพที่คุณจะได้รับโดยประมาณ";
+    let resultText = "";
+    let displayAmount = 0;
+    let unit = "บาท";
+    let hasInput = false;
     const breakdown: Array<{ label: string; value: number; color: string }> = [];
+    const messages: Array<{
+      kind: "info" | "warn" | "goal";
+      text: string;
+      link?: { label: string; url: string };
+    }> = [];
+    let disclaimer =
+      "* ตัวเลขนี้เป็นเพียงการประมาณการเบื้องต้น ไม่รวมดอกผลสะสมประจำปีที่ประกันสังคมประกาศเพิ่มเติม";
+
+    // ── ค่าคงที่ตามกฎหมาย (แก้จุดเดียวเมื่อกฎเปลี่ยน) ──
+    const PENSION_CEILING = 17500; // เพดานฐานเงินเดือน ปี 2569 (เดิม 15,000)
+    const PENSION_BASE_RATE = 20; // % เมื่อส่งครบ 15 ปี
+    const PENSION_INCREMENT = 1.5; // % ต่อปีที่ส่งเกิน 15 ปี
+    const CHARAPHAP_RATE = 0.06; // เงินสมทบกรณีชราภาพ 3% (ผู้ประกันตน) + 3% (นายจ้าง)
+    const M39_BASE = 4800; // ฐานเงินเดือน ม.39 (สูตรเดิม)
+    const M40_INTEREST = 0.03; // ดอกผลทบต้น 3% ต่อปี (ม.40)
+    const POVERTY_LINE = 2997; // เส้นความยากจน บาท/คน/เดือน (สศช. 2566)
+    const M33_RETIRE_AGE = 55; // อายุครบสิทธิชราภาพ ม.33/39
+    const M40_RETIRE_AGE = 60; // อายุครบสิทธิชราภาพ ม.40
+    const CARE_URL = "https://sso.thaith.ai/care/";
+
+    const currentAge = parseFloat(userData.age || "0") || 0;
+
+    // อัตราบำนาญ (%) ตามจำนวนเดือนที่ส่งสมทบ
+    const pensionRate = (months: number) =>
+      months < 180
+        ? 0
+        : PENSION_BASE_RATE +
+          Math.floor((months - 180) / 12) * PENSION_INCREMENT;
+
+    // ทบต้นรายปีสำหรับเงินออมชราภาพ ม.40
+    const compoundSavings = (monthlySave: number, months: number) => {
+      let balance = 0;
+      const fullYears = Math.floor(months / 12);
+      const remMonths = months % 12;
+      for (let y = 0; y < fullYears; y++) {
+        balance = (balance + monthlySave * 12) * (1 + M40_INTEREST);
+      }
+      balance += monthlySave * remMonths; // เศษเดือนปีสุดท้าย ยังไม่ทบดอกผล
+      return Math.round(balance);
+    };
+
+    // เปรียบเทียบบำนาญรายเดือนกับเส้นความยากจน
+    const addPovertyComparison = (monthlyPension: number) => {
+      const above = monthlyPension >= POVERTY_LINE;
+      messages.push({
+        kind: above ? "info" : "warn",
+        text: above
+          ? `บำนาญนี้สูงกว่าเส้นความยากจน (~${POVERTY_LINE.toLocaleString("th-TH")} บาท/คน/เดือน, สศช. 2566) แต่ยังควรมีเงินออมส่วนตัวเสริมเพื่อคุณภาพชีวิตที่ดีขึ้น`
+          : `บำนาญนี้ต่ำกว่าเส้นความยากจน (~${POVERTY_LINE.toLocaleString("th-TH")} บาท/คน/เดือน, สศช. 2566) การมีเงินออมเสริมจึงสำคัญมาก`,
+      });
+    };
+
+    const ceilingNote =
+      "เพดานฐานเงินเดือนปรับเป็น 17,500 บาท (ปี 2569) และจะทยอยเพิ่มเป็น 20,000 บาท (ปี 2572) และ 23,000 บาท (ปี 2575)";
 
     if (selectedSection === "39") {
+      // ── มาตรา 39: รวมระยะเวลาทั้ง ม.33 และ ม.39 ──
       const years33 = parseFloat(userData.yearsSection33 || "0") || 0;
       const months33 = parseFloat(userData.monthsSection33 || "0") || 0;
       const monthly33 = parseFloat(userData.monthlySection33 || "0") || 0;
       const years39 = parseFloat(userData.yearsSection39 || "0") || 0;
       const months39 = parseFloat(userData.monthsSection39 || "0") || 0;
-      const monthly39 = 432;
 
       const tMonths33 = years33 * 12 + months33;
       const tMonths39 = years39 * 12 + months39;
-      const total33 = tMonths33 * monthly33;
-      const total39 = tMonths39 * monthly39;
-      totalSum = total33 + total39;
+      const totalCombinedMonths = tMonths33 + tMonths39;
+      hasInput = totalCombinedMonths > 0;
 
-      if (totalSum > 0) {
+      // คาดการณ์เดือนสะสมเมื่อส่งต่อจนเกษียณ (อายุ 55)
+      const monthsToRetire =
+        currentAge > 0 ? Math.max(0, M33_RETIRE_AGE - currentAge) * 12 : 0;
+      const projectedMonths = totalCombinedMonths + monthsToRetire;
+
+      if (totalCombinedMonths < 180) {
+        // ได้เป็นเงินก้อน (บำเหน็จ) — ดึงยอดสะสมจริงมาแสดง
+        const total33 = tMonths33 * monthly33;
+        const total39 = tMonths39 * 432;
+        displayAmount = total33 + total39;
+        unit = "บาท";
+        resultText = "คุณจะได้รับเป็นเงินก้อนครั้งเดียว (บำเหน็จชราภาพ)";
+
         if (total33 > 0) {
           breakdown.push({
-            label: `มาตรา 33 (${years33} ปี ${months33 > 0 ? `${months33} เดือน` : ""})`,
+            label: `มาตรา 33 (${years33} ปี${months33 > 0 ? ` ${months33} เดือน` : ""})`,
             value: total33,
             color: "#3D3A7E",
           });
         }
         if (total39 > 0) {
           breakdown.push({
-            label: `มาตรา 39 (${years39} ปี ${months39 > 0 ? `${months39} เดือน` : ""})`,
+            label: `มาตรา 39 (${years39} ปี${months39 > 0 ? ` ${months39} เดือน` : ""})`,
             value: total39,
             color: "#e0c927",
           });
         }
+
+        // มองไปข้างหน้า — ใช้อายุปัจจุบันคำนวณว่าเมื่อเกษียณจะถึงบำนาญหรือไม่
+        if (currentAge > 0 && projectedMonths >= 180) {
+          const pension = M39_BASE * (pensionRate(projectedMonths) / 100);
+          const py = Math.floor(projectedMonths / 12);
+          messages.push({
+            kind: "goal",
+            text: `หากส่งต่อจนเกษียณอายุ ${M33_RETIRE_AGE} ปี (อีก ${Math.round(
+              monthsToRetire / 12
+            )} ปี) คุณจะส่งครบ ~${py} ปี และเปลี่ยนเป็นบำนาญรายเดือนตลอดชีวิต ~${Math.round(
+              pension
+            ).toLocaleString("th-TH")} บาท/เดือน`,
+          });
+        } else {
+          const monthsToPension = 180 - totalCombinedMonths;
+          const yLeft = Math.floor(monthsToPension / 12);
+          const mLeft = monthsToPension % 12;
+          messages.push({
+            kind: "goal",
+            text: `อีก ${yLeft} ปี${mLeft > 0 ? ` ${mLeft} เดือน` : ""} (เมื่อส่งสมทบรวมครบ 15 ปี) สิทธิ์ของคุณจะเปลี่ยนจาก "เงินก้อน" เป็น "บำนาญรายเดือนตลอดชีวิต"`,
+          });
+        }
+      } else {
+        // ได้เงินรายเดือน (บำนาญ) — ม.39 สูตรเดิมใช้ฐานเงินเดือนเฉลี่ยคงที่ 4,800 บาท
+        const rate = pensionRate(totalCombinedMonths);
+        displayAmount = M39_BASE * (rate / 100);
+        unit = "บาท/เดือน";
+        resultText = "คุณจะได้รับเป็นเงินรายเดือนตลอดชีวิต (บำนาญชราภาพ)";
+        breakdown.push({
+          label: `บำนาญรายเดือน (ฐาน ม.39 อัตรา ${rate}%)`,
+          value: displayAmount,
+          color: "#3D3A7E",
+        });
+        addPovertyComparison(displayAmount);
       }
-    } else {
+
+      // กล่องแจ้งเตือน ม.39 — เพิ่มบริบทสูตรเดิม vs CARE (เริ่มใช้ปี 2570)
+      messages.push({
+        kind: "warn",
+        text: "ตัวเลขนี้คำนวณตามสูตรเดิม (ฐานคงที่ 4,800 บาท) ตั้งแต่ปี 2570 สูตรใหม่ 'CARE' จะใช้ค่าจ้างเฉลี่ยตลอดชีวิตการทำงาน รวมช่วงที่เคยอยู่มาตรา 33 ด้วย ผลลัพธ์จริงของคุณจึงอาจแตกต่างจากนี้ แนะนำให้ติดตามสูตรใหม่",
+        link: { label: "ลองคำนวณด้วยสูตร CARE", url: CARE_URL },
+      });
+    } else if (
+      selectedSection === "40" ||
+      selectedSection === "40-1" ||
+      selectedSection === "40-2" ||
+      selectedSection === "40-3"
+    ) {
+      // ── มาตรา 40: ได้เป็นเงินก้อน (บำเหน็จ) เท่านั้น ──
       const years = parseFloat(userData.yearsContributing || "0") || 0;
       const months = parseFloat(userData.monthsContributing || "0") || 0;
-      const monthly = parseFloat(userData.monthlyContribution || "0") || 0;
-      const tMonths = years * 12 + months;
-      totalSum = tMonths * monthly;
+      const totalMonths = years * 12 + months;
+      hasInput = totalMonths > 0;
+      unit = "บาท";
 
-      if (totalSum > 0) {
-        const sectionName =
-          selectedSection === "33"
-            ? "มาตรา 33"
-            : selectedSection === "40-1"
-            ? "มาตรา 40 ทางเลือกที่ 1"
-            : selectedSection === "40-2"
-            ? "มาตรา 40 ทางเลือกที่ 2"
-            : selectedSection === "40-3"
-            ? "มาตรา 40 ทางเลือกที่ 3"
-            : "มาตรา 40";
+      // ค่าทางเลือกอาจอยู่ใน monthlyContribution (จาก Radio) หรือยังว่างอยู่
+      // จึง fallback จาก selectedSection เพื่อกันกรณี user ไม่ได้แตะ Radio
+      const rawOption = userData.monthlyContribution || "";
+      const optionChosen = ["70", "100", "300"].includes(rawOption)
+        ? rawOption
+        : selectedSection === "40-1"
+        ? "70"
+        : selectedSection === "40-3"
+        ? "300"
+        : "100"; // 40-2 หรือ 40 ทั่วไป
 
-        const labelColor =
-          selectedSection === "33"
-            ? "#3D3A7E"
-            : "#f3762a";
+      const monthsToRetire =
+        currentAge > 0 ? Math.max(0, M40_RETIRE_AGE - currentAge) * 12 : 0;
+      const projectedMonths = totalMonths + monthsToRetire;
 
-        breakdown.push({
-          label: `${sectionName} (${years} ปี ${months > 0 ? `${months} เดือน` : ""})`,
-          value: totalSum,
-          color: labelColor,
+      // หมายเหตุสิทธิ์ ม.40 — แสดงเสมอ
+      messages.push({
+        kind: "info",
+        text: "โปรดทราบ: ผู้ประกันตนมาตรา 40 จะได้รับสิทธิ์ชราภาพเป็น 'เงินก้อนครั้งเดียว (บำเหน็จ)' เท่านั้น ไม่มีบำนาญรายเดือนตลอดชีวิต",
+      });
+
+      if (optionChosen === "70") {
+        displayAmount = 0;
+        resultText = "ทางเลือกที่ 1 — ไม่มีการสะสมเงินออมกรณีชราภาพ";
+        messages.push({
+          kind: "warn",
+          text: "ทางเลือกที่ 1 ของคุณ ไม่มีการสะสมเงินออมกรณีชราภาพ คุณจะไม่ได้รับเงินก้อนในส่วนนี้เมื่ออายุครบ 60 ปี",
+        });
+      } else {
+        // ทางเลือก 2 = รัฐช่วยออม 50/เดือน, ทางเลือก 3 = 150/เดือน — ทบต้น 3%/ปี
+        const monthlySave = optionChosen === "300" ? 150 : 50;
+        const savings = compoundSavings(monthlySave, totalMonths);
+        const bonus =
+          optionChosen === "100" && totalMonths >= 180 ? 10000 : 0;
+        displayAmount = savings + bonus;
+        resultText = "เงินก้อนออมชราภาพ (บำเหน็จ)";
+        if (displayAmount > 0) {
+          breakdown.push({
+            label: `ออมชราภาพ (${years} ปี${months > 0 ? ` ${months} เดือน` : ""})`,
+            value: displayAmount,
+            color: "#f3762a",
+          });
+        }
+        messages.push({
+          kind: "info",
+          text: `รัฐช่วยออมให้เดือนละ ${monthlySave} บาท คำนวณรวมดอกผลทบต้นโดยประมาณ 3% ต่อปี${
+            optionChosen === "100"
+              ? totalMonths >= 180
+                ? " (รวมโบนัสพิเศษจากรัฐ 10,000 บาทแล้ว)"
+                : " หากส่งครบ 15 ปีจะได้รับโบนัสพิเศษจากรัฐอีก 10,000 บาท"
+              : ""
+          }`,
+        });
+        // มองไปข้างหน้าตามอายุ
+        if (currentAge > 0 && projectedMonths > totalMonths) {
+          const projSavings =
+            compoundSavings(monthlySave, projectedMonths) +
+            (optionChosen === "100" && projectedMonths >= 180 ? 10000 : 0);
+          messages.push({
+            kind: "goal",
+            text: `หากส่งต่อจนอายุ ${M40_RETIRE_AGE} ปี (อีก ${Math.round(
+              monthsToRetire / 12
+            )} ปี) เงินก้อนชราภาพของคุณจะเพิ่มเป็นประมาณ ${projSavings.toLocaleString(
+              "th-TH"
+            )} บาท`,
+          });
+        }
+        // หมายเหตุออมเพิ่ม (Phase 2 — ยังไม่รวมในการคำนวณ)
+        messages.push({
+          kind: "info",
+          text: "หากคุณ 'ออมเพิ่ม' (สูงสุด 1,000 บาท/เดือน) เงินส่วนนี้จะได้รับดอกผลจากกองทุนเช่นกัน (ยังไม่รวมในการคำนวณนี้)",
         });
       }
+
+      disclaimer =
+        "* คำนวณรวมดอกผลทบต้นโดยประมาณ 3% ต่อปี เป็นการประมาณการเบื้องต้น ผลตอบแทนจริงขึ้นอยู่กับผลประกอบการของกองทุนประกันสังคม";
+    } else {
+      // ── มาตรา 33 (และ default) ──
+      const years = parseFloat(userData.yearsContributing || "0") || 0;
+      const months = parseFloat(userData.monthsContributing || "0") || 0;
+      const totalMonths = years * 12 + months;
+      hasInput = totalMonths > 0;
+
+      const monthsToRetire =
+        currentAge > 0 ? Math.max(0, M33_RETIRE_AGE - currentAge) * 12 : 0;
+      const projectedMonths = totalMonths + monthsToRetire;
+
+      if (totalMonths < 180) {
+        // บำเหน็จชราภาพ = เงินสมทบกรณีชราภาพสะสม (6% ของฐานเพดาน: 3% ตน + 3% นายจ้าง)
+        displayAmount = Math.round(totalMonths * (PENSION_CEILING * CHARAPHAP_RATE));
+        unit = "บาท";
+        resultText = "คุณจะได้รับเป็นเงินก้อนครั้งเดียว (บำเหน็จชราภาพ)";
+        breakdown.push({
+          label: `เงินก้อนบำเหน็จ (${years} ปี${months > 0 ? ` ${months} เดือน` : ""})`,
+          value: displayAmount,
+          color: "#3D3A7E",
+        });
+
+        // มองไปข้างหน้า — ใช้อายุปัจจุบันคาดการณ์ถึงตอนเกษียณ
+        if (currentAge > 0 && projectedMonths >= 180) {
+          const pension = PENSION_CEILING * (pensionRate(projectedMonths) / 100);
+          const py = Math.floor(projectedMonths / 12);
+          messages.push({
+            kind: "goal",
+            text: `หากส่งต่อจนเกษียณอายุ ${M33_RETIRE_AGE} ปี (อีก ${Math.round(
+              monthsToRetire / 12
+            )} ปี) คุณจะส่งครบ ~${py} ปี และเปลี่ยนเป็นบำนาญรายเดือนตลอดชีวิต ~${Math.round(
+              pension
+            ).toLocaleString("th-TH")} บาท/เดือน`,
+          });
+        } else {
+          const monthsToPension = 180 - totalMonths;
+          const yLeft = Math.floor(monthsToPension / 12);
+          const mLeft = monthsToPension % 12;
+          const pension = PENSION_CEILING * (PENSION_BASE_RATE / 100);
+          messages.push({
+            kind: "goal",
+            text: `อีก ${yLeft} ปี${mLeft > 0 ? ` ${mLeft} เดือน` : ""} (เมื่อส่งสมทบครบ 15 ปี) สิทธิ์ของคุณจะเปลี่ยนจาก "เงินก้อน" เป็น "บำนาญรายเดือนตลอดชีวิต" ประมาณ ${pension.toLocaleString("th-TH")} บาท/เดือน`,
+          });
+        }
+      } else {
+        // ได้เงินรายเดือน (บำนาญ)
+        const rate = pensionRate(totalMonths);
+        displayAmount = PENSION_CEILING * (rate / 100);
+        unit = "บาท/เดือน";
+        resultText = "คุณจะได้รับเป็นเงินรายเดือนตลอดชีวิต (บำนาญชราภาพ)";
+        breakdown.push({
+          label: `บำนาญรายเดือน (อัตรา ${rate}%)`,
+          value: displayAmount,
+          color: "#3D3A7E",
+        });
+
+        // หากยังไม่เกษียณ คาดการณ์บำนาญที่เพิ่มขึ้นเมื่อส่งต่อ
+        if (currentAge > 0 && projectedMonths > totalMonths) {
+          const projPension =
+            PENSION_CEILING * (pensionRate(projectedMonths) / 100);
+          if (projPension > displayAmount) {
+            messages.push({
+              kind: "goal",
+              text: `หากส่งต่อจนเกษียณอายุ ${M33_RETIRE_AGE} ปี บำนาญของคุณจะเพิ่มเป็นประมาณ ${Math.round(
+                projPension
+              ).toLocaleString("th-TH")} บาท/เดือน`,
+            });
+          }
+        }
+        addPovertyComparison(displayAmount);
+      }
+
+      disclaimer = `* คำนวณบนฐานเพดานเงินเดือนสูงสุด ${PENSION_CEILING.toLocaleString(
+        "th-TH"
+      )} บาท — ${ceilingNote} ตัวเลขนี้เป็นการประมาณการเบื้องต้น ไม่รวมดอกผลสะสมประจำปีที่ประกันสังคมประกาศเพิ่มเติม`;
     }
 
-    if (totalSum === 0) return null;
+    // ม.40 หัวข้อแยกเฉพาะ
+    const widgetHeadline =
+      selectedSection === "40" ||
+      selectedSection === "40-1" ||
+      selectedSection === "40-2" ||
+      selectedSection === "40-3"
+        ? "ยอดเงินออมชราภาพสะสมที่จะได้รับ (ตอนอายุ 60 ปี)"
+        : headline;
+
+    if (!hasInput) return null;
+
+    const barTotal = breakdown.reduce((sum, item) => sum + item.value, 0);
 
     return (
       <Box
@@ -1691,73 +1952,178 @@ export default function Home() {
         shadow="md"
         mb={6}
         mt={4}
-        position="relative"
-        overflow="hidden"
-        _before={{
-          content: '""',
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: "4px",
-          bgGradient: "linear(to-r, primary.500, accent.500)",
-        }}
       >
         <VStack align="stretch" spacing={5}>
-          <Flex justify="space-between" align="baseline" direction={{ base: "column", sm: "row" }} gap={2}>
-            <Text fontSize="md" fontWeight="bold" color="gray.600">
-              ยอดเงินจ่ายสะสมทั้งหมดโดยประมาณ
-            </Text>
-            <Heading size="lg" color="primary.500" fontWeight="extrabold">
-              {totalSum.toLocaleString("th-TH")}{" "}
-              <Text as="span" fontSize="md" fontWeight="bold" color="gray.500">
-                บาท
+          <Box>
+            <Flex
+              justify="space-between"
+              align="baseline"
+              direction={{ base: "column", sm: "row" }}
+              gap={2}
+            >
+              <Text fontSize="md" fontWeight="bold" color="gray.600">
+                {widgetHeadline}
               </Text>
-            </Heading>
-          </Flex>
-
-          {/* Visual Progress Bar Chart */}
-          <Box h="4" w="full" bg="gray.100" borderRadius="full" overflow="hidden" display="flex">
-            {breakdown.map((item, idx) => {
-              const pct = (item.value / totalSum) * 100;
-              return (
-                <Tooltip key={idx} label={`${item.label}: ${item.value.toLocaleString("th-TH")} บาท`} hasArrow>
-                  <Box
-                    w={`${pct}%`}
-                    h="full"
-                    bg={item.color}
-                    transition="width 1s ease"
-                  />
-                </Tooltip>
-              );
-            })}
+              <Heading size="lg" color="primary.500" fontWeight="extrabold">
+                {displayAmount.toLocaleString("th-TH")}{" "}
+                <Text as="span" fontSize="md" fontWeight="bold" color="gray.500">
+                  {unit}
+                </Text>
+              </Heading>
+            </Flex>
+            {resultText && (
+              <Text fontSize="sm" color="accent.600" fontWeight="bold" mt={1}>
+                {resultText}
+              </Text>
+            )}
           </Box>
 
-          {/* Labels and Detailed Legend */}
-          <Grid templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)" }} gap={4}>
-            {breakdown.map((item, idx) => {
-              const pct = Math.round((item.value / totalSum) * 100);
-              return (
-                <Flex key={idx} align="center" gap={3} p={2} borderRadius="lg" bg="gray.50" borderWidth="1px" borderColor="gray.100">
-                  <Box w="3" h="3" borderRadius="full" bg={item.color} flexShrink={0} />
-                  <Box>
-                    <Text fontSize="xs" color="gray.500" fontWeight="bold" noOfLines={1}>
-                      {item.label}
-                    </Text>
-                    <Text fontSize="sm" fontWeight="extrabold" color="gray.800">
-                      {item.value.toLocaleString("th-TH")} บาท ({pct}%)
-                    </Text>
-                  </Box>
-                </Flex>
-              );
-            })}
-          </Grid>
+          {/* Visual Progress Bar Chart */}
+          {barTotal > 0 && (
+            <Box
+              h="4"
+              w="full"
+              bg="gray.100"
+              borderRadius="full"
+              overflow="hidden"
+              display="flex"
+            >
+              {breakdown.map((item, idx) => {
+                const pct = (item.value / barTotal) * 100;
+                return (
+                  <Tooltip
+                    key={idx}
+                    label={`${item.label}: ${item.value.toLocaleString("th-TH")} ${unit}`}
+                    hasArrow
+                  >
+                    <Box
+                      w={`${pct}%`}
+                      h="full"
+                      bg={item.color}
+                      transition="width 1s ease"
+                    />
+                  </Tooltip>
+                );
+              })}
+            </Box>
+          )}
 
-          {/* Note breakdown */}
+          {/* Labels and Detailed Legend */}
+          {barTotal > 0 && (
+            <Grid templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)" }} gap={4}>
+              {breakdown.map((item, idx) => {
+                const pct = Math.round((item.value / barTotal) * 100);
+                return (
+                  <Flex
+                    key={idx}
+                    align="center"
+                    gap={3}
+                    p={2}
+                    borderRadius="lg"
+                    bg="gray.50"
+                    borderWidth="1px"
+                    borderColor="gray.100"
+                  >
+                    <Box w="3" h="3" borderRadius="full" bg={item.color} flexShrink={0} />
+                    <Box>
+                      <Text fontSize="xs" color="gray.500" fontWeight="bold" noOfLines={1}>
+                        {item.label}
+                      </Text>
+                      <Text fontSize="sm" fontWeight="extrabold" color="gray.800">
+                        {item.value.toLocaleString("th-TH")} {unit} ({pct}%)
+                      </Text>
+                    </Box>
+                  </Flex>
+                );
+              })}
+            </Grid>
+          )}
+
+          {/* Educational / warning message boxes — icon chip carries the
+              semantic category at zero conscious tax (Signal 39 Layer 1) */}
+          {messages.map((msg, idx) => {
+            // Map the 3 statuses onto the 3 brand hues only:
+            // warn → accent (orange), goal → primary (purple), info → secondary (yellow)
+            const tone =
+              msg.kind === "warn"
+                ? {
+                    bg: "accent.50",
+                    chipBg: "accent.500",
+                    iconColor: "white",
+                    text: "accent.700",
+                    linkColor: "accent.600",
+                    icon: FiAlertTriangle,
+                  }
+                : msg.kind === "goal"
+                ? {
+                    bg: "primary.50",
+                    chipBg: "primary.500",
+                    iconColor: "white",
+                    text: "primary.700",
+                    linkColor: "primary.600",
+                    icon: FiTarget,
+                  }
+                : {
+                    bg: "secondary.50",
+                    chipBg: "secondary.400",
+                    iconColor: "primary.800",
+                    text: "text.primary",
+                    linkColor: "primary.700",
+                    icon: FiInfo,
+                  };
+            return (
+              <Flex
+                key={idx}
+                bg={tone.bg}
+                borderRadius="lg"
+                p={3}
+                gap={3}
+                align="flex-start"
+              >
+                <Flex
+                  bg={tone.chipBg}
+                  borderRadius="md"
+                  align="center"
+                  justify="center"
+                  boxSize={7}
+                  flexShrink={0}
+                >
+                  <Icon as={tone.icon} color={tone.iconColor} boxSize={4} />
+                </Flex>
+                <Box pt={0.5}>
+                  <Text
+                    fontSize="sm"
+                    color={tone.text}
+                    fontWeight={msg.kind === "goal" ? "semibold" : "normal"}
+                    lineHeight="relaxed"
+                  >
+                    {msg.text}
+                  </Text>
+                  {msg.link && (
+                    <Text
+                      as="a"
+                      href={msg.link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      display="inline-block"
+                      mt={1}
+                      fontSize="sm"
+                      fontWeight="semibold"
+                      color={tone.linkColor}
+                      textDecoration="underline"
+                    >
+                      {msg.link.label}
+                    </Text>
+                  )}
+                </Box>
+              </Flex>
+            );
+          })}
+
+          {/* Disclaimer */}
           <Box borderTopWidth="1px" borderColor="gray.100" pt={3}>
             <Text fontSize="xs" color="gray.400" lineHeight="relaxed">
-              * คำนวณประมาณการสะสมจากจำนวนปีและอัตราส่งต่อเดือนที่คุณระบุ
-              ตัวเลขนี้ไม่รวมผลประโยชน์ตอบแทนรายปี ดอกผลสะสม และเงินช่วยเหลือสมทบเพิ่มเติมจากนายจ้างหรือรัฐบาล
+              {disclaimer}
             </Text>
           </Box>
         </VStack>
@@ -1774,7 +2140,7 @@ export default function Home() {
     : [
         { id: 1, label: "เลือกมาตรา", sections: ["selection", "section40Options"] },
         { id: 2, label: "สิทธิประโยชน์", sections: ["currentBenefits"] },
-        { id: 3, label: "คำนวณเงินสะสม", sections: ["userInput"] },
+        { id: 3, label: "ประมาณการเงินเกษียณ", sections: ["userInput"] },
         { id: 4, label: "ร่วมเสนอแนะ", sections: ["suggestBenefits"] },
       ];
 
