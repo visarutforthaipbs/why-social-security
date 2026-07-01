@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import mongoose from "mongoose";
+import dbConnect from "@/lib/dbConnect";
 import UserFeedback from "@/models/UserFeedback";
-
-async function connectDB() {
-  if (mongoose.connection.readyState >= 1) return;
-  await mongoose.connect(process.env.MONGODB_URI!);
-}
 
 function checkAuth(request: NextRequest): boolean {
   const password = process.env.DASHBOARD_PASSWORD;
@@ -20,7 +15,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    await connectDB();
+    await dbConnect();
 
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const todayStart = new Date();

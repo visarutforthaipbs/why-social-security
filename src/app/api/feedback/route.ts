@@ -1,31 +1,11 @@
 import { NextResponse } from "next/server";
-import mongoose from "mongoose";
+import dbConnect from "@/lib/dbConnect";
 import UserFeedback from "@/models/UserFeedback";
-
-// Connect to MongoDB if not already connected
-const connectDB = async () => {
-  try {
-    if (mongoose.connection.readyState >= 1) {
-      return;
-    }
-
-    if (!process.env.MONGODB_URI) {
-      throw new Error("MONGODB_URI is not defined");
-    }
-
-    // Connect directly using the full URI string
-    await mongoose.connect(process.env.MONGODB_URI);
-    console.log("Connected to MongoDB");
-  } catch (error) {
-    console.error("MongoDB connection error:", error);
-    throw error;
-  }
-};
 
 export async function POST(req: Request) {
   try {
     // Connect to the database
-    await connectDB();
+    await dbConnect();
 
     // Parse the request body
     const data = await req.json();
