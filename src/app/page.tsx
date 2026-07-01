@@ -358,7 +358,7 @@ export default function Home() {
                   <Text as="span" color="accent.500">
                     ประกันสังคม
                   </Text>{" "}
-                  <br /> ทุกเดือน — แต่ไม้รู้{" "}
+                  <br /> ทุกเดือน — แต่ไม่รู้{" "}
                   <Text
                     as="span"
                     textDecoration="underline"
